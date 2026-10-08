@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-<title>온라인 장기 — P2P</title>
+<title>장기 마루 — P2P</title>
 <style>
 :root{--y:#FEE500;--yd:#d9bf00;--br:#3C1E1E;--bg:#FFF6CF;--line:#eadfb2;--mut:#8a7a55;--cho:#1f7a3d;--han:#c9302c;--wood:#6b4a24}
 *{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--br);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent}
@@ -40,7 +40,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 </style>
 </head>
 <body>
-<header class="appbar"><div class="brand"><span class="logo">將</span>온라인 장기<small>P2P</small></div><div class="status"><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
+<header class="appbar"><div class="brand"><span class="logo">將</span>장기 마루<small>P2P</small></div><div class="status"><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
 <div class="wrap">
 <main id="lobbyView" class="lobby">
   <div class="hero"><div class="big"><span>楚</span></div><h1>친구와 한 판 둘까요?</h1><p>서버 없이 두 브라우저가 직접 연결됩니다</p></div>
@@ -81,7 +81,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="redCaptured" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="blueCaptured" class="captured-pieces"></div></div></div>
   <div id="log" class="log" style="max-height:100px"></div>
   <div class="divider"></div><h2>📖 규칙</h2>
-  <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
+  <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>두 궁이 마주 보는 빅장은 허용되며, 상대가 다음 수에 해소하지 못하면 계가로 승패를 정합니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
   <button id="closeLog" class="primary" style="width:100%;margin-top:12px">닫기</button>
 </div></div>
 <div id="helpModal" class="modal hidden"><div class="modal-card">
@@ -192,7 +192,7 @@ function emptyBoard() {
   return b;
 }
 function initialState(){
-  return {board:emptyBoard(),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,reason:'',names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,limit:timeLimitMs},rematch:{red:false,blue:false}};
+  return {board:emptyBoard(),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,bikjang:false,reason:'',names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,limit:timeLimitMs},rematch:{red:false,blue:false}};
 }
 function pieceLabel(p){return p?PIECES[p.side][p.type]:''}
 function capturedByColor(color){return state?.captured?.[color]||[];}
@@ -297,10 +297,6 @@ function generalsFacing(b){
   return pathClear(b,rk[0],rk[1],bk[0],bk[1]);
 }
 function isSquareAttacked(b,x,y,bySide){
-  // General-to-general line attack.
-  let gx=null;
-  for(let yy=0;yy<10;yy++) for(let xx=0;xx<9;xx++) if(b[yy][xx]?.side===bySide&&b[yy][xx].type==='K') gx=[xx,yy];
-  if(gx && gx[0]===x && pathClear(b,gx[0],gx[1],x,y) && inBoard(x,y)) return true;
   for(let yy=0;yy<10;yy++) for(let xx=0;xx<9;xx++){
     const p=b[yy][xx]; if(!p||p.side!==bySide) continue;
     const moves=pseudoMoves(b,xx,yy,true);
@@ -359,6 +355,11 @@ function snapshot(){return JSON.stringify(state)}
 function send(obj){if(dc&&dc.readyState==='open') dc.send(JSON.stringify(obj));}
 function broadcast(){send({type:'STATE',state});}
 
+function endByScore(why){
+  const r=scoreOf(state.board,'red'),b=scoreOf(state.board,'blue');
+  state.status='finished'; state.winner=r>b?'red':'blue'; state.reason=`${why} · 계가 초 ${r} : 한 ${b}`; state.check=null;
+  setNotice(`${state.reason} — ${state.winner==='red'?'초':'한'} 승리`);
+}
 function hostApplyMove(from,to){
   if(!state||state.status!=='playing') return false;
   const p=state.board[from.y][from.x]; if(!p||p.side!==state.turn) return false;
@@ -375,6 +376,12 @@ function hostApplyMove(from,to){
   if(!any&&state.check){ state.status='finished'; state.winner=mover; state.reason='외통'; resultTag='외통'; setNotice(`${mover==='red'?'초':'한'}의 외통수!`); }
   else if(state.check){ resultTag='장군'; setNotice(`${enemy==='red'?'초':'한'} 장군!`); }
   else setNotice('');
+  const facing=generalsFacing(state.board); // 빅장(대궁): 상대가 다음 수에 해소하지 못하면 계가
+  if(state.status==='playing'){
+    if(facing&&state.bikjang){ endByScore('빅장'); resultTag='빅장'; }
+    else if(facing){ resultTag+=' 빅장'; setNotice(`빅장! ${enemy==='red'?'초가':'한이'} 해소하지 않으면 계가로 종료됩니다.`); }
+  }
+  state.bikjang=facing;
   state.history.push({text:notationMove(p,from.x,from.y,to.x,to.y),captured,check:resultTag});
   state.rematch={red:false,blue:false};
   broadcast(); drawBoard();
@@ -386,8 +393,11 @@ function hostApplyPass(sd){
   if(!state||state.status!=='playing'||state.turn!==sd||state.check===sd) return false;
   settleClock(sd); state.passes++; state.moveNo++; state.turn=sd==='red'?'blue':'red'; state.lastMove=null; state.check=null;
   state.history.push({text:`${sd==='red'?'초':'한'} 한수쉼`,captured:null,check:''});
-  if(state.passes>=2){const r=scoreOf(state.board,'red'),b=scoreOf(state.board,'blue');state.status='finished';state.winner=r>b?'red':'blue';state.reason=`계가 초 ${r} : 한 ${b}`;setNotice(`${state.reason} — ${state.winner==='red'?'초':'한'} 승리`);}
-  else setNotice(`${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
+  const facing=generalsFacing(state.board);
+  if(state.passes>=2) endByScore('연속 한수쉼');
+  else if(facing&&state.bikjang) endByScore('빅장');
+  else setNotice(facing?'빅장 상태입니다. 해소하지 않으면 계가로 종료됩니다.':`${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
+  state.bikjang=facing;
   state.rematch={red:false,blue:false}; broadcast(); drawBoard(); return true;
 }
 function localSelect(x,y){
@@ -555,7 +565,7 @@ function handleMessage(raw){
 function updateGuestNotice(){
   if(!state)return;
   if(state.status==='finished'){setNotice(`${state.reason?state.reason+' — ':''}${state.winner==='red'?'초':'한'} 승리 — 재대국을 선택하세요.`);}
-  else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`); else setNotice('');
+  else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`); else if(state.bikjang) setNotice('빅장! 해소하지 않으면 계가로 종료됩니다.'); else setNotice('');
 }
 function resign(){
   if(!state||state.status!=='playing')return;
