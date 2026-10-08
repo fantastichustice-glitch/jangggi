@@ -36,6 +36,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 .modal{position:fixed;inset:0;background:rgba(60,30,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:100}.modal-card{width:100%;max-width:560px;max-height:88dvh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:18px}.modal-card h2{margin:0 0 10px;font-size:18px}.hidden{display:none!important}
 .log{max-height:200px;overflow:auto;background:#fffdf3;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;line-height:1.6}.move-row{display:grid;grid-template-columns:30px 1fr;gap:6px}.move-no{color:var(--mut);text-align:right}.log .system{color:#2563eb}.log .warn{color:#b45309}.log .bad{color:var(--han)}
 .capture-tray{display:flex;gap:10px;margin:8px 0}.captured-group{flex:1}.captured-title{font-size:11px;color:var(--mut);margin-bottom:3px}.captured-pieces{display:flex;gap:2px;flex-wrap:wrap;min-height:24px}.mini-piece{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#f7e4b0;border:1px solid var(--wood)}.mini-piece.red{color:var(--cho)}.mini-piece.blue{color:var(--han)}.empty-capture{font-size:11px;color:var(--mut)}
+.notice.alert{color:var(--han);font-weight:800}.cell.bik{filter:drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 2px #ef4444)}
 .rules{font-size:12px;line-height:1.7;color:#5b4636}
 </style>
 </head>
@@ -320,7 +321,7 @@ function hasAnyLegalMove(b,side){for(let y=0;y<10;y++)for(let x=0;x<9;x++){if(b[
 function notationMove(p,fx,fy,tx,ty){return `${p.side==='red'?'초':'한'} ${PIECES[p.side][p.type]} ${fx+1},${10-fy} → ${tx+1},${10-ty}`}
 
 function drawBoard(){
-  cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to');c.innerHTML='';});
+  cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to','bik');c.innerHTML='';});
   if(!state){ turnBadge.classList.add('hidden'); moveCounter.textContent='수 0'; return; }
   if(solo&&state.status==='playing') side=state.turn; // 혼자 두기: 차례인 쪽이 곧 내 진영
   if(state.lastMove){
@@ -332,6 +333,8 @@ function drawBoard(){
     const p=state.board[y][x];
     if(p){const d=document.createElement('div');d.className='piece '+(p.side==='red'?'red':'blue')+' type-'+p.type+(p.type==='K'?' general':'');if(selected&&selected.x===x&&selected.y===y)d.classList.add('sel');const label=PIECES[p.side][p.type];d.textContent=label;d.setAttribute('aria-label',p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label);d.title=p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label;c.appendChild(d);}
   }
+  const bikOn=!!state.bikjang&&state.status==='playing'; noticeEl.classList.toggle('alert',bikOn);
+  if(bikOn) for(const c of ['red','blue']){const g=generalPos(state.board,c); if(g) cellAt(g[0],g[1])?.classList.add('bik');}
   if(selected){for(const m of legalMovesFrom(state.board,selected.x,selected.y)){const c=cellAt(m.x,m.y);if(c)c.classList.add(state.board[m.y][m.x]?'capture':'highlight')}}
   const turnSide=state.turn;
   turnBadge.classList.remove('hidden'); turnBadge.querySelector('.mini-dot').className='mini-dot '+(turnSide==='red'?'mini-red':'mini-blue'); turnBadge.querySelector('span:last-child').textContent=(turnSide==='red'?'🔵 초 차례':'🔴 한 차례');
@@ -400,6 +403,10 @@ function hostApplyPass(sd){
   state.bikjang=facing;
   state.rematch={red:false,blue:false}; broadcast(); drawBoard(); return true;
 }
+function confirmBikjang(from,to){ // 빅장이 걸린 상태에서 해소하지 않는 수를 두려 할 때 확인
+  if(!state.bikjang||!generalsFacing(applyMoveToBoard(state.board,from.x,from.y,to.x,to.y))) return true;
+  return confirm('빅장 상태입니다.\n이 수로는 두 궁이 계속 마주 보게 되어 빅장이 성립하고, 계가(점수)로 대국이 끝납니다.\n\n그래도 두시겠어요?');
+}
 function localSelect(x,y){
   if(!state||state.status!=='playing'||!side||!online()) return;
   const p=state.board[y][x];
@@ -407,6 +414,8 @@ function localSelect(x,y){
     if(selected.x===x&&selected.y===y){selected=null;drawBoard();return;}
     if(p&&p.side===side){selected={x,y};drawBoard();return;}
     if(side!==state.turn){setNotice('지금은 상대 차례입니다.');return;}
+    if(!isLegalMove(state.board,selected.x,selected.y,x,y)){setNotice('그 수는 둘 수 없습니다.');return;}
+    if(!confirmBikjang(selected,{x,y})) return;
     if(role==='host'){
       if(hostApplyMove(selected,{x,y})) selected=null,drawBoard();
       else setNotice('그 수는 둘 수 없습니다.');
@@ -601,7 +610,7 @@ signalApplyBtn.onclick=()=>{
   })();
 };
 copySignalBtn.onclick=async()=>{try{await navigator.clipboard.writeText(signalOutput.value);setNotice('내 코드를 복사했습니다.');}catch{signalOutput.select();document.execCommand('copy');setNotice('내 코드를 복사했습니다.')}};
-passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
+passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(state.bikjang&&!confirm('빅장 상태에서 한수쉼하면 빅장이 성립해 계가(점수)로 대국이 끝납니다.\n\n그래도 쉴까요?'))return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
 resignBtn.onclick=resign; rematchBtn.onclick=requestRematch;
 $('resetUiBtn').onclick=()=>location.reload();
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden'); $('closeHelp').onclick=()=>$('helpModal').classList.add('hidden');
