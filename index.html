@@ -2,113 +2,97 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>온라인 장기 — P2P</title>
 <style>
-  :root{--bg:#0f172a;--panel:#111827;--panel2:#1f2937;--line:#374151;--text:#f8fafc;--muted:#94a3b8;--accent:#22c55e;--warn:#f59e0b;--danger:#ef4444;--board:#d7b26d;--board2:#c79d55;--grid:#5b4630;--red:#b91c1c;--blue:#1d4ed8;--gold:#e9c46a;--ink:#3f2c1e;--cream:#f8e7b5;}
-  *{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#18233b 0,#0f172a 55%);color:var(--text);font-family:Arial,"Malgun Gothic","Noto Sans KR",sans-serif;min-height:100vh}
-  button,input,textarea{font:inherit;font-family:inherit} button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:#334155;color:#fff;font-weight:700} button:hover{filter:brightness(1.08)} button:disabled{opacity:.45;cursor:not-allowed;filter:none}
-  .primary{background:var(--accent);color:#06240f}.danger{background:var(--danger)}.secondary{background:#475569}.ghost{background:transparent;border:1px solid #475569}.small{padding:7px 9px;font-size:13px}
-  .wrap{max-width:1180px;margin:0 auto;padding:18px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}.title{font-size:26px;font-weight:900;letter-spacing:-.03em}.subtitle{font-size:13px;color:var(--muted);margin-top:2px}
-  .status{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{padding:7px 10px;border-radius:999px;background:#1e293b;border:1px solid #334155;font-size:13px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:#64748b;margin-right:5px}.dot.ok{background:#22c55e;box-shadow:0 0 12px #22c55e}.dot.bad{background:#ef4444}
-  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}.card{background:rgba(17,24,39,.88);border:1px solid #253047;border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
-  .board-card{padding:16px;overflow:hidden}.board-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.board-head-left{min-width:0}.turnline{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.turn-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#0b1220;border:1px solid #334155;font-size:12px;color:#e2e8f0}.turn-badge .mini-dot{width:7px;height:7px;border-radius:50%;display:inline-block}.mini-red{background:#60a5fa}.mini-blue{background:#ef4444}.move-counter{font-size:12px;color:#94a3b8}.side-labels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}.side-label{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid #334155;background:#0b1220;border-radius:11px;font-size:12px}.side-label.active{border-color:#60a5fa;box-shadow:0 0 0 1px rgba(96,165,250,.15),0 0 20px rgba(96,165,250,.07)}.side-label .name{font-weight:900}.side-label .captured{font-size:11px;color:#94a3b8}.side-label.red .name{color:#60a5fa}.side-label.blue .name{color:#f87171}.turn{font-size:17px;font-weight:900}.notice{font-size:13px;color:#cbd5e1;min-height:20px}.board-wrap{display:flex;justify-content:center}.board{position:relative;width:min(92vw,760px);aspect-ratio:9/10;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.18),transparent 24%),repeating-linear-gradient(8deg,rgba(91,70,48,.035) 0 2px,transparent 2px 8px),linear-gradient(135deg,var(--board),var(--board2));border-radius:12px;border:7px solid #704d2a;box-shadow:inset 0 0 0 2px #eed49a,inset 0 0 30px rgba(61,39,20,.14),0 16px 38px rgba(0,0,0,.32);user-select:none;touch-action:none;}
-  .board-grid{position:absolute;inset:5% 4% 5% 4%;overflow:visible;z-index:2}
-  .palace-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}.palace-lines line{stroke:#5b4630;stroke-width:1.4;vector-effect:non-scaling-stroke;stroke-linecap:round}
-  .cell{position:absolute;width:calc(100% / 8);height:calc(100% / 9);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;z-index:2}.cell:hover{z-index:4}.cell.last-from::after,.cell.last-to::after{content:"";position:absolute;width:72%;height:72%;border-radius:50%;border:2px solid rgba(20,83,45,.6);pointer-events:none}.cell.last-to::after{border-color:rgba(146,64,14,.72);box-shadow:0 0 0 4px rgba(146,64,14,.08)}.cell.highlight::before,.cell.capture::before{content:"";position:absolute;width:34%;height:34%;border-radius:50%;background:rgba(34,197,94,.35);box-shadow:0 0 0 2px rgba(34,197,94,.65)}.cell.capture::before{width:88%;height:auto;aspect-ratio:1;background:rgba(239,68,68,.12);box-shadow:0 0 0 3px rgba(239,68,68,.8)}
-  .piece{width:76%;height:auto;aspect-ratio:1;max-width:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(19px,3vw,30px);font-weight:900;background:radial-gradient(circle at 35% 28%,#fff8de 0 20%,#f2d994 58%,#d6ae62 100%);border:2px solid #76552d;box-shadow:0 5px 8px rgba(0,0,0,.3),inset 0 0 0 2px #fff5cf,inset 0 0 0 4px rgba(113,75,34,.08);position:relative;z-index:3;transition:transform .12s ease,box-shadow .12s ease,filter .12s ease}.piece::after{content:"";position:absolute;inset:7%;border-radius:50%;border:1px solid rgba(118,85,45,.28);pointer-events:none}.piece:hover{transform:translateY(-2px);box-shadow:0 8px 12px rgba(0,0,0,.32),inset 0 0 0 2px #fff5cf}.piece.red{color:var(--blue)}.piece.blue{color:var(--red)}
-  /* 장기알끼리 서로 다른 서체 */
-  .piece.type-K,.mini-piece.type-K{font-family:"Gungsuh","궁서체","BatangChe","Batang",serif!important;font-weight:950}
-  .piece.type-G,.mini-piece.type-G{font-family:"Batang","바탕체","Noto Serif KR","Nanum Myeongjo",serif!important;font-weight:800}
-  .piece.type-E,.mini-piece.type-E{font-family:"Nanum Myeongjo","Noto Serif KR","Batang",serif!important;font-weight:900}
-  .piece.type-H,.mini-piece.type-H{font-family:"Malgun Gothic","맑은 고딕","Noto Sans KR",sans-serif!important;font-weight:900}
-  .piece.type-R,.mini-piece.type-R{font-family:"Dotum","돋움","Arial Unicode MS",sans-serif!important;font-weight:900}
-  .piece.type-C,.mini-piece.type-C{font-family:"Gulim","굴림","Malgun Gothic","Noto Sans KR",sans-serif!important;font-weight:900}
-  .piece.type-S,.mini-piece.type-S{font-family:"Noto Serif KR","Nanum Myeongjo","Batang",serif!important;font-weight:900}
-  .piece.general{font-size:clamp(22px,3.5vw,34px);letter-spacing:-.08em}.piece.sel{outline:4px solid rgba(34,197,94,.85);transform:scale(1.08);box-shadow:0 0 0 7px rgba(34,197,94,.12),0 8px 14px rgba(0,0,0,.34),inset 0 0 0 2px #fff5cf}.piece.red.general{background:radial-gradient(circle at 35% 28%,#fff8de 0 20%,#dfe8fa 58%,#9eb5d5 100%)}.piece.blue.general{background:radial-gradient(circle at 35% 28%,#fff8de 0 20%,#f3d7cf 58%,#cf9b8e 100%)}.piece.sel{outline:4px solid rgba(34,197,94,.85);transform:scale(1.06)}
-  .coord{font-size:10px;color:rgba(55,43,28,.65);position:absolute;pointer-events:none}.rank{position:absolute;left:-19px}.file{position:absolute;bottom:-18px}
-  .side{display:flex;flex-direction:column;gap:12px}.section{padding:14px}.section h3{margin:0 0 8px;font-size:15px}.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}.stack{display:flex;flex-direction:column;gap:8px}.muted{color:var(--muted);font-size:12px;line-height:1.45}.codebox{width:100%;min-height:96px;resize:vertical;background:#0b1220;color:#dbeafe;border:1px solid #334155;border-radius:10px;padding:9px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px}.input{width:100%;background:#0b1220;color:#fff;border:1px solid #334155;border-radius:10px;padding:10px}.divider{height:1px;background:#243044;margin:8px 0}.log{max-height:210px;overflow:auto;background:#0b1220;border:1px solid #263246;border-radius:10px;padding:8px;font-size:12px;line-height:1.6}.log .move-row{display:grid;grid-template-columns:34px 1fr;gap:7px;padding:3px 1px}.log .move-no{color:#64748b;text-align:right}.capture-tray{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:#0b1220;border:1px solid #263246;border-radius:10px}.captured-group{min-width:0}.captured-title{font-size:10px;color:#64748b;margin-bottom:4px}.captured-pieces{display:flex;gap:2px;flex-wrap:wrap;min-height:24px}.mini-piece{width:25px;height:25px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;background:#f2d994;border:1px solid #76552d}.mini-piece.red{color:var(--blue)}.mini-piece.blue{color:var(--red)}.empty-capture{font-size:11px;color:#475569;line-height:25px}.log .system{color:#93c5fd}.log .warn{color:#fbbf24}.log .bad{color:#fca5a5}
-  .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions .wide{grid-column:1/-1}.rules{max-height:230px;overflow:auto;color:#cbd5e1;font-size:12px;line-height:1.55}.footer{margin-top:12px;color:#64748b;font-size:11px;text-align:center}
-  .hidden{display:none!important}.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100}.modal-card{max-width:720px;width:100%;background:#111827;border:1px solid #334155;border-radius:16px;padding:18px}.modal-card h2{margin-top:0}.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
-  @media(max-width:920px){.layout{grid-template-columns:1fr}.side{grid-row:2}.board{width:min(96vw,720px)}.top{align-items:flex-start;flex-direction:column}.status{width:100%}}
+:root{--y:#FEE500;--yd:#d9bf00;--br:#3C1E1E;--bg:#FFF6CF;--line:#eadfb2;--mut:#8a7a55;--cho:#1f7a3d;--han:#c9302c;--wood:#6b4a24}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--br);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#fff;font-weight:800;box-shadow:0 2px 0 rgba(60,30,30,.12),inset 0 0 0 1px var(--line)}button:active{transform:scale(.97)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.primary{background:var(--y);box-shadow:0 2px 0 var(--yd)}.danger{background:#fff0ee;color:var(--han)}.secondary{background:#fff}.ghost{background:transparent;box-shadow:none;color:var(--mut)}.small{padding:7px 10px;font-size:13px}.wide{grid-column:1/-1}
+.appbar{background:var(--y);display:flex;justify-content:space-between;align-items:center;padding:10px 14px;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:900}.brand small{font-size:11px;background:var(--br);color:var(--y);padding:2px 7px;border-radius:99px}.logo{width:30px;height:30px;border-radius:9px;background:var(--br);color:var(--y);display:grid;place-items:center;font-weight:900}
+.status{display:flex;gap:6px}.pill{background:rgba(255,255,255,.7);padding:5px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}#rolePill{display:none}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#9ca3af;margin-right:5px}.dot.ok{background:#16a34a}.dot.bad{background:#ef4444}
+.wrap{max-width:560px;margin:0 auto;padding:14px 12px 28px}.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(60,30,30,.08)}.card h3{margin:0 0 10px;font-size:15px}
+.lobby{display:flex;flex-direction:column;gap:12px}.hero{text-align:center;padding:18px 0 6px}.hero .big{width:76px;height:76px;margin:0 auto 10px;display:grid;place-items:center;font-size:40px;font-weight:900;color:var(--cho);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);background:var(--wood)}.hero .big span{display:grid;place-items:center;width:92%;height:92%;background:#f7e4b0;clip-path:inherit}.hero h1{margin:0;font-size:24px}.hero p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:13px;color:var(--mut);font-weight:700}.input{width:100%;background:#fffdf3;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px}.input:focus{outline:2px solid var(--y);border-color:var(--y)}
+.stack{display:flex;flex-direction:column;gap:8px}.row{display:flex;gap:8px;align-items:center}.muted{color:var(--mut);font-size:12px;line-height:1.5}.divider{height:1px;background:var(--line);margin:10px 0}
+.codebox{width:100%;min-height:92px;resize:vertical;background:#fffdf3;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all}
+.game{display:flex;flex-direction:column;gap:10px}.statusbar{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:9px 14px;box-shadow:0 2px 10px rgba(60,30,30,.07)}.turn{font-size:16px;font-weight:900}.notice{font-size:12px;color:var(--mut);min-height:16px}.move-counter{font-size:12px;color:var(--mut);white-space:nowrap}.turn-badge{display:none}
+.table{display:flex;flex-direction:column;gap:8px}.table>.board-wrap{order:1}.table>#blueLabel{order:0}.table>#redLabel{order:2}[data-me=blue] .table>#redLabel{order:0}[data-me=blue] .table>#blueLabel{order:2}
+.side-label{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:14px;border:2px solid transparent;box-shadow:0 2px 10px rgba(60,30,30,.07)}.side-label.active{border-color:var(--y);box-shadow:0 0 0 3px rgba(254,229,0,.5)}
+.avatar{width:38px;height:38px;flex:none;display:grid;place-items:center;font-size:20px;font-weight:900;background:#f7e4b0;border-radius:50%;border:2px solid var(--wood)}.side-label.red .avatar{color:var(--cho)}.side-label.blue .avatar{color:var(--han)}
+.info{display:flex;flex-direction:column;min-width:0;flex:1}.side-label .name{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.side-label .captured{font-size:11px;color:var(--mut)}
+.clk{font-variant-numeric:tabular-nums;font-weight:900;font-size:16px;background:var(--br);color:#fff;border-radius:10px;padding:5px 10px;min-width:62px;text-align:center}.clk.low{background:var(--han)}
+.board-wrap{width:min(100%,max(300px,calc((100dvh - 330px)*.9)));margin:0 auto}.board{container-type:inline-size;position:relative;width:100%;aspect-ratio:9/10;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.35),transparent 40%),linear-gradient(135deg,#efc87f,#dfae5f);border-radius:10px;border:6px solid #a87c3a;box-shadow:0 8px 20px rgba(60,30,30,.25);user-select:none;touch-action:manipulation}
+.board-grid{position:absolute;inset:5.2% 4.6%;overflow:visible}.palace-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}.palace-lines line{stroke:var(--wood);stroke-width:1.3;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.cell{position:absolute;width:calc(100%/8);height:calc(100%/9);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;z-index:2;filter:drop-shadow(0 2px 1.5px rgba(40,20,0,.3))}
+.cell.last-from::after,.cell.last-to::after{content:"";position:absolute;width:84%;aspect-ratio:1;border-radius:10px;border:2px dashed rgba(60,30,30,.45);pointer-events:none}.cell.last-to::after{border:3px solid #f59e0b}
+.cell.highlight::before,.cell.capture::before{content:"";position:absolute;width:30%;aspect-ratio:1;border-radius:50%;background:rgba(31,122,61,.6);z-index:4}.cell.capture::before{width:90%;background:rgba(201,48,44,.12);border:3px solid var(--han)}
+.piece{position:relative;isolation:isolate;z-index:3;width:78%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:4.6cqw;font-weight:900;line-height:1;background:var(--wood);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);transition:transform .12s}
+.piece::before{content:"";position:absolute;inset:7%;z-index:-1;background:radial-gradient(circle at 35% 30%,#fffbe8,#f7e4b0 60%,#ebcf86);clip-path:inherit}.piece.red{color:var(--cho)}.piece.blue{color:var(--han)}.piece.general{width:94%;font-size:6cqw}.piece.sel{transform:scale(1.12)}.piece.sel::before{background:radial-gradient(circle at 35% 30%,#fff,#d9f7c8 60%,#9fe08a)}
+.actionbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.actionbar button{padding:11px 4px;font-size:13px}
+.modal{position:fixed;inset:0;background:rgba(60,30,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:100}.modal-card{width:100%;max-width:560px;max-height:88dvh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:18px}.modal-card h2{margin:0 0 10px;font-size:18px}.hidden{display:none!important}
+.log{max-height:200px;overflow:auto;background:#fffdf3;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;line-height:1.6}.move-row{display:grid;grid-template-columns:30px 1fr;gap:6px}.move-no{color:var(--mut);text-align:right}.log .system{color:#2563eb}.log .warn{color:#b45309}.log .bad{color:var(--han)}
+.capture-tray{display:flex;gap:10px;margin:8px 0}.captured-group{flex:1}.captured-title{font-size:11px;color:var(--mut);margin-bottom:3px}.captured-pieces{display:flex;gap:2px;flex-wrap:wrap;min-height:24px}.mini-piece{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#f7e4b0;border:1px solid var(--wood)}.mini-piece.red{color:var(--cho)}.mini-piece.blue{color:var(--han)}.empty-capture{font-size:11px;color:var(--mut)}
+.rules{font-size:12px;line-height:1.7;color:#5b4636}
 </style>
 </head>
 <body>
+<header class="appbar"><div class="brand"><span class="logo">將</span>온라인 장기<small>P2P</small></div><div class="status"><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
 <div class="wrap">
-  <div class="top">
-    <div><div class="title">🏮 온라인 장기 <span style="font-size:13px;color:#93c5fd">P2P</span></div><div class="subtitle">게임 서버 없이 WebRTC로 두 브라우저가 직접 대국합니다.</div></div>
-    <div class="status"><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="rolePill">역할: -</span><span class="pill" id="sidePill">진영: -</span></div>
-  </div>
-
-  <div class="layout">
-    <section class="card board-card">
-      <div class="board-head"><div class="board-head-left"><div class="turnline"><div id="turnText" class="turn">먼저 방을 연결하세요.</div><span id="turnBadge" class="turn-badge hidden"><span class="mini-dot mini-red"></span><span>초 선공</span></span><span id="moveCounter" class="move-counter">수 0</span></div><div id="notice" class="notice">방 만들기 또는 방 참가로 시작합니다.</div></div><button id="resignBtn" class="danger small" disabled>기권</button></div>
-      <div id="sideLabels" class="side-labels"><div id="redLabel" class="side-label red"><span class="name">🔵 초</span><span class="captured">잡은 기물 0</span></div><div id="blueLabel" class="side-label blue"><span class="name">🔴 한</span><span class="captured">잡은 기물 0</span></div></div><div class="board-wrap"><div id="board" class="board">
-        <div class="board-grid" id="grid">
-          <svg class="palace-lines" viewBox="0 0 8 9" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/><line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/><line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/><line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/><line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/><line x1="0" y1="0" x2="0" y2="9"/><line x1="1" y1="0" x2="1" y2="9"/><line x1="2" y1="0" x2="2" y2="9"/><line x1="3" y1="0" x2="3" y2="9"/><line x1="4" y1="0" x2="4" y2="9"/><line x1="5" y1="0" x2="5" y2="9"/><line x1="6" y1="0" x2="6" y2="9"/><line x1="7" y1="0" x2="7" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/><line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/><line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/></svg>
-        </div>
-      </div></div>
-      <div class="footer">초 = 파랑 · 한 = 빨강 · 클릭으로 기물을 선택하고 목적지를 클릭하세요.</div>
-    </section>
-
-    <aside class="side">
-      <section class="card section">
-        <h3>🔌 P2P 연결</h3>
-        <div class="stack">
-          <button id="createBtn" class="primary">방 만들기</button>
-          <button id="joinBtn" class="secondary">방 참가하기</button>
-          <button id="helpBtn" class="ghost">연결 방법 보기</button>
-          <div id="signalArea" class="hidden">
-            <div class="divider"></div>
-            <div id="signalStep" class="muted"></div>
-            <textarea id="signalInput" class="codebox" placeholder="상대에게 받은 연결 코드를 붙여 넣으세요."></textarea>
-            <div class="row"><button id="signalApplyBtn" class="primary" style="flex:1">코드 적용</button><button id="copySignalBtn" class="small" disabled>내 코드 복사</button></div>
-            <textarea id="signalOutput" class="codebox" placeholder="여기에 내 연결 코드가 나타납니다." readonly></textarea>
-          </div>
-          <div class="muted">※ 게임 서버는 사용하지 않습니다. 다만 인터넷에서 P2P 연결 성공률을 높이기 위해 공개 STUN 서버를 연결 보조로 사용할 수 있습니다. 장기 수/상태는 서버에 저장되지 않습니다.</div>
-        </div>
-      </section>
-
-      <section class="card section">
-        <h3>🎮 대국</h3>
-        <div class="actions">
-          <button id="rematchBtn" disabled>재대국 요청</button>
-          <button id="resetUiBtn" class="ghost">화면 새로고침</button>
-        </div>
+<main id="lobbyView" class="lobby">
+  <div class="hero"><div class="big"><span>楚</span></div><h1>친구와 한 판 둘까요?</h1><p>서버 없이 두 브라우저가 직접 연결됩니다</p></div>
+  <section class="card"><h3>👤 대국 설정</h3>
+    <label class="field">내 이름 (상대에게 표시)<input id="nameInput" class="input" maxlength="12" placeholder="이름 입력"></label>
+    <label class="field" style="margin:0">대국 시계 (방장 설정 적용)<select id="timeSel" class="input"><option value="0">없음</option><option value="5">5분</option><option value="10" selected>10분</option><option value="20">20분</option><option value="30">30분</option></select></label>
+  </section>
+  <section class="card"><h3>🧑 혼자 두기</h3><button id="soloBtn" class="secondary" style="width:100%">혼자 두기 (초·한 번갈아 두기)</button><div class="muted" style="margin-top:8px">연결 없이 한 화면에서 양쪽을 번갈아 둡니다. 시계·한수쉼·계가도 그대로 적용됩니다.</div></section>
+  <section class="card"><h3>🔌 상대와 연결</h3>
+    <div class="stack">
+      <button id="createBtn" class="primary">방 만들기</button>
+      <button id="joinBtn" class="secondary">방 참가하기</button>
+      <div id="signalArea" class="hidden">
         <div class="divider"></div>
-        <div id="rematchStatus" class="muted">대국 종료 후 재대국을 요청할 수 있습니다.</div>
-      </section>
-
-      <section class="card section"><h3>📜 대국 기록</h3><div id="moveLog" class="log"></div><div class="divider"></div><div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="redCaptured" class="captured-pieces"><span class="empty-capture">없음</span></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="blueCaptured" class="captured-pieces"><span class="empty-capture">없음</span></div></div></div><div class="divider"></div><div id="log" class="log" style="max-height:110px"></div></section>
-
-      <section class="card section">
-        <h3>📖 적용 규칙</h3>
-        <div class="rules">
-          차·마·상·포·졸/병·사·왕(장/한)의 기본적인 한국 장기 이동 규칙을 적용합니다.<br>
-          포는 반드시 한 개의 기물을 뛰어야 하며 포를 뛰거나 포를 잡을 수 없습니다.<br>
-          마·상은 중간 경로가 막히면 움직일 수 없습니다.<br>
-          왕/사는 자기 궁 안에서 움직이고 궁성의 대각선도 사용할 수 있습니다.<br>
-          장군은 상대 왕을 공격하는 상태이며, 그 상태에서 상대에게 합법적인 수가 없으면 외통수로 종료합니다.<br>
-          서버 없는 P2P 특성상 호스트 브라우저가 닫히면 방도 종료됩니다.
-        </div>
-      </section>
-    </aside>
+        <div id="signalStep" class="muted" style="margin-bottom:8px"></div>
+        <textarea id="signalInput" class="codebox" placeholder="상대에게 받은 연결 코드를 붙여 넣으세요."></textarea>
+        <div class="row" style="margin:8px 0"><button id="signalApplyBtn" class="primary" style="flex:1">코드 적용</button><button id="copySignalBtn" class="small" disabled>내 코드 복사</button></div>
+        <textarea id="signalOutput" class="codebox" placeholder="여기에 내 연결 코드가 나타납니다." readonly></textarea>
+      </div>
+      <button id="helpBtn" class="ghost small">연결 방법 보기</button>
+      <div class="muted">게임 서버는 쓰지 않습니다. 연결 성공률을 높이기 위해 공개 STUN 서버만 보조로 사용하며, 수/상태는 저장되지 않습니다.</div>
+    </div>
+  </section>
+</main>
+<main id="gameView" class="game hidden" data-me="red">
+  <div class="statusbar"><div><div id="turnText" class="turn">먼저 방을 연결하세요.</div><div id="notice" class="notice"></div></div><span id="turnBadge" class="turn-badge"><span class="mini-dot"></span><span></span></span><span id="moveCounter" class="move-counter">수 0</span></div>
+  <div class="table">
+    <div id="blueLabel" class="side-label blue"><div class="avatar">漢</div><div class="info"><span class="name">한</span><span class="captured">점수</span></div><span class="clk" id="blueClk"></span></div>
+    <div class="board-wrap"><div id="board" class="board"><div class="board-grid" id="grid"><svg class="palace-lines" viewBox="0 0 8 9" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/><line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/><line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/><line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/><line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/><line x1="0" y1="0" x2="0" y2="9"/><line x1="1" y1="0" x2="1" y2="9"/><line x1="2" y1="0" x2="2" y2="9"/><line x1="3" y1="0" x2="3" y2="9"/><line x1="4" y1="0" x2="4" y2="9"/><line x1="5" y1="0" x2="5" y2="9"/><line x1="6" y1="0" x2="6" y2="9"/><line x1="7" y1="0" x2="7" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/><line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/><line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/></svg></div></div></div>
+    <div id="redLabel" class="side-label red"><div class="avatar">楚</div><div class="info"><span class="name">초</span><span class="captured">점수</span></div><span class="clk" id="redClk"></span></div>
   </div>
+  <div class="actionbar"><button id="passBtn" disabled>한수쉼</button><button id="resignBtn" class="danger" disabled>기권</button><button id="rematchBtn" disabled>재대국</button><button id="logBtn">기록·규칙</button><button id="resetUiBtn" class="ghost wide">로비로 나가기</button></div>
+  <div id="rematchStatus" class="muted" style="text-align:center"></div>
+</main>
 </div>
-
-<div id="helpModal" class="modal hidden">
-  <div class="modal-card">
-    <h2>🔌 P2P 연결 방법</h2>
-    <p><b>1. 방장</b>은 <b>방 만들기</b>를 누르고 생성된 <b>내 코드</b>를 친구에게 보냅니다.</p>
-    <p><b>2. 참가자</b>는 <b>방 참가하기</b>을 누르고 방장의 코드를 입력한 다음 <b>코드 적용</b>을 누릅니다. 그러면 참가자용 응답 코드가 생성됩니다.</p>
-    <p><b>3. 참가자</b>는 응답 코드를 다시 방장에게 보냅니다.</p>
-    <p><b>4. 방장</b>은 받은 응답 코드를 붙여 넣고 <b>코드 적용</b>을 누릅니다. 연결되면 자동으로 초/한이 배정되고 대국이 시작됩니다.</p>
-    <div class="divider"></div>
-    <p class="muted">이 방식은 시그널링 서버 없이 사람이 연결 정보를 전달합니다. WebRTC 특성상 일부 엄격한 NAT/방화벽 환경에서는 직접 연결이 실패할 수 있습니다.</p>
-    <button id="closeHelp" class="primary">확인</button>
-  </div>
-</div>
-
+<div id="logModal" class="modal hidden"><div class="modal-card">
+  <h2>📜 대국 기록</h2><div id="moveLog" class="log"></div>
+  <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="redCaptured" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="blueCaptured" class="captured-pieces"></div></div></div>
+  <div id="log" class="log" style="max-height:100px"></div>
+  <div class="divider"></div><h2>📖 규칙</h2>
+  <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
+  <button id="closeLog" class="primary" style="width:100%;margin-top:12px">닫기</button>
+</div></div>
+<div id="helpModal" class="modal hidden"><div class="modal-card">
+  <h2>🔌 P2P 연결 방법</h2>
+  <p><b>1. 방장</b>이 <b>방 만들기</b>를 누르고 생성된 <b>내 코드</b>를 친구에게 보냅니다.</p>
+  <p><b>2. 참가자</b>는 <b>방 참가하기</b>를 누르고 방장 코드를 붙여 넣어 <b>코드 적용</b>을 누르면 응답 코드가 생깁니다.</p>
+  <p><b>3. 참가자</b>가 응답 코드를 방장에게 보냅니다.</p>
+  <p><b>4. 방장</b>이 응답 코드를 붙여 넣고 <b>코드 적용</b>을 누르면 연결되어 대국 화면으로 넘어갑니다.</p>
+  <p class="muted">일부 엄격한 NAT/방화벽 환경에서는 직접 연결이 실패할 수 있습니다.</p>
+  <button id="closeHelp" class="primary" style="width:100%">확인</button>
+</div></div>
 <script>
 'use strict';
 
@@ -127,7 +111,7 @@ const $ = id => document.getElementById(id);
 const boardEl = $('board'), gridEl = $('grid');
 const turnText = $('turnText'), noticeEl = $('notice'), logEl = $('log');
 const connDot = $('connDot'), connText = $('connText'), rolePill = $('rolePill'), sidePill = $('sidePill');
-const resignBtn = $('resignBtn'), rematchBtn = $('rematchBtn'), rematchStatus = $('rematchStatus');
+const passBtn=$('passBtn'), nameInput=$('nameInput'), timeSel=$('timeSel'), resignBtn = $('resignBtn'), rematchBtn = $('rematchBtn'), rematchStatus = $('rematchStatus');
 const turnBadge=$('turnBadge'), moveCounter=$('moveCounter'), redLabel=$('redLabel'), blueLabel=$('blueLabel'), moveLog=$('moveLog'), redCaptured=$('redCaptured'), blueCaptured=$('blueCaptured');
 const signalArea = $('signalArea'), signalStep = $('signalStep'), signalInput = $('signalInput'), signalOutput = $('signalOutput');
 const createBtn = $('createBtn'), joinBtn = $('joinBtn'), signalApplyBtn = $('signalApplyBtn'), copySignalBtn = $('copySignalBtn');
@@ -142,7 +126,23 @@ let pendingSignalMode = null; // host-answer | guest-offer
 let pendingLocalCode = '';
 let selected = null;
 let state = null;
-let unresp = false;
+let solo = false, unresp = false, timeLimitMs = 0, clockBase = Date.now();
+const SCORE={R:13,C:7,H:5,E:3,G:3,S:2,K:0};
+const online=()=>solo||(dc&&dc.readyState==='open');
+const getName=()=>nameInput.value.trim().slice(0,12)||'익명';
+function scoreOf(b,sd){let t=sd==='blue'?1.5:0;for(const r of b)for(const q of r)if(q&&q.side===sd)t+=SCORE[q.type];return t}
+function showView(v){$('lobbyView').classList.toggle('hidden',v!=='lobby');$('gameView').classList.toggle('hidden',v!=='game');}
+function settleClock(sd){const c=state.clock;if(c&&c.limit)c[sd]=Math.max(0,c[sd]-(Date.now()-clockBase));clockBase=Date.now();}
+function clockLeft(sd){const c=state?.clock;if(!c||!c.limit)return null;let v=c[sd];if(state.status==='playing'&&state.turn===sd)v-=Date.now()-clockBase;return Math.max(0,v)}
+function fmt(ms){if(ms==null)return '∞';const t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
+function renderClock(){if(!state)return;for(const c of ['red','blue']){const v=clockLeft(c);$(c+'Clk').classList.toggle('low',v!=null&&v<30000);}$('redClk').textContent=fmt(clockLeft('red'));$('blueClk').textContent=fmt(clockLeft('blue'));}
+setInterval(()=>{
+  if(!state)return; renderClock();
+  if(role==='host'&&state.status==='playing'&&online()&&state.clock.limit&&clockLeft(state.turn)<=0){
+    const l=state.turn; settleClock(l); state.status='finished'; state.winner=l==='red'?'blue':'red'; state.reason='시간 초과'; state.check=null;
+    broadcast(); drawBoard(); setNotice(`${l==='red'?'초':'한'} 시간 초과 — ${state.winner==='red'?'초':'한'} 승리`);
+  }
+},500);
 
 const PIECES = {
   red:  { K:'楚', G:'士', R:'車', C:'包', H:'馬', E:'象', S:'卒' },
@@ -164,7 +164,7 @@ function setRole(r, s) {
   role = r; side = s;
   rolePill.textContent = '역할: ' + (r==='host'?'방장':'참가자');
   sidePill.textContent = '진영: ' + (s==='red'?'초':'한');
-  buildGrid(); // 한(참가자)은 판을 뒤집어 내 말이 아래에 오도록
+  $('gameView').dataset.me=s; buildGrid(); // 한(참가자)은 판을 뒤집어 내 말이 아래에 오도록
   if(state) drawBoard();
 }
 function emptyBoard() {
@@ -192,7 +192,7 @@ function emptyBoard() {
   return b;
 }
 function initialState(){
-  return {board:emptyBoard(),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},rematch:{red:false,blue:false}};
+  return {board:emptyBoard(),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,reason:'',names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,limit:timeLimitMs},rematch:{red:false,blue:false}};
 }
 function pieceLabel(p){return p?PIECES[p.side][p.type]:''}
 function capturedByColor(color){return state?.captured?.[color]||[];}
@@ -207,7 +207,7 @@ function countCaptured(color){return capturedByColor(color).length;}
 let cells=[];
 function buildGrid(){
   gridEl.querySelectorAll('.cell').forEach(c=>c.remove()); cells=new Array(90);
-  const flip=side==='blue';
+  const flip=!solo&&side==='blue';
   for(let y=0;y<10;y++) for(let x=0;x<9;x++){
     const cell=document.createElement('div'); cell.className='cell';
     cell.style.left=((flip?8-x:x)/8*100)+'%'; cell.style.top=((flip?9-y:y)/9*100)+'%';
@@ -326,6 +326,7 @@ function notationMove(p,fx,fy,tx,ty){return `${p.side==='red'?'초':'한'} ${PIE
 function drawBoard(){
   cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to');c.innerHTML='';});
   if(!state){ turnBadge.classList.add('hidden'); moveCounter.textContent='수 0'; return; }
+  if(solo&&state.status==='playing') side=state.turn; // 혼자 두기: 차례인 쪽이 곧 내 진영
   if(state.lastMove){
     cellAt(state.lastMove.from.x,state.lastMove.from.y)?.classList.add('last-from');
     cellAt(state.lastMove.to.x,state.lastMove.to.y)?.classList.add('last-to');
@@ -339,15 +340,17 @@ function drawBoard(){
   const turnSide=state.turn;
   turnBadge.classList.remove('hidden'); turnBadge.querySelector('.mini-dot').className='mini-dot '+(turnSide==='red'?'mini-red':'mini-blue'); turnBadge.querySelector('span:last-child').textContent=(turnSide==='red'?'🔵 초 차례':'🔴 한 차례');
   moveCounter.textContent='수 '+state.moveNo;
-  turnText.textContent = state.status==='playing' ? `${state.turn==='red'?'초':'한'} 차례${side===state.turn?' — 내 차례!':' — 상대 차례'}` : (state.winner?`대국 종료 — ${state.winner==='red'?'초':'한'} 승리`:'대국 종료');
+  turnText.textContent = state.status==='playing' ? `${state.turn==='red'?'초':'한'} 차례${solo?'':side===state.turn?' — 내 차례!':' — 상대 차례'}` : (state.winner?`대국 종료 — ${state.winner==='red'?'초':'한'} 승리${state.reason?' ('+state.reason+')':''}`:'대국 종료');
   const currentRed=side==='red'; const currentBlue=side==='blue'; redLabel.classList.toggle('active',state.status==='playing'&&turnSide==='red'); blueLabel.classList.toggle('active',state.status==='playing'&&turnSide==='blue');
-  redLabel.querySelector('.captured').textContent='잡은 기물 '+countCaptured('red'); blueLabel.querySelector('.captured').textContent='잡은 기물 '+countCaptured('blue');
+  redLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'red'); blueLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'blue')+' (덤 포함)';
+  redLabel.querySelector('.name').textContent='초 · '+(state.names?.red||''); blueLabel.querySelector('.name').textContent='한 · '+(state.names?.blue||''); renderClock();
   renderCaptured(redCaptured,capturedByColor('red')); renderCaptured(blueCaptured,capturedByColor('blue'));
   moveLog.innerHTML='';
   const hist=state.history||[];
   if(!hist.length){moveLog.innerHTML='<div class="muted">아직 착수가 없습니다.</div>';} else hist.forEach((h,i)=>{const r=document.createElement('div');r.className='move-row';const n=document.createElement('div');n.className='move-no';n.textContent=(i+1)+'.';const t=document.createElement('div');t.textContent=h.text+(h.captured?' × '+pieceLabel(h.captured):'');if(h.check)t.textContent+=' '+h.check;r.append(n,t);moveLog.appendChild(r);});
-  resignBtn.disabled=state.status!=='playing'||!dc||dc.readyState!=='open';
-  rematchBtn.disabled=state.status!=='finished'||!dc||dc.readyState!=='open';
+  passBtn.disabled=state.status!=='playing'||state.turn!==side||state.check===side||!online();
+  resignBtn.disabled=state.status!=='playing'||!online();
+  rematchBtn.disabled=state.status!=='finished'||!online();
   rematchStatus.textContent = state.status==='finished' ? `재대국: 초 ${state.rematch.red?'✅':'⬜'} · 한 ${state.rematch.blue?'✅':'⬜'}` : '대국 종료 후 재대국을 요청할 수 있습니다.';
 }
 function setNotice(t){noticeEl.textContent=t}
@@ -360,6 +363,7 @@ function hostApplyMove(from,to){
   if(!state||state.status!=='playing') return false;
   const p=state.board[from.y][from.x]; if(!p||p.side!==state.turn) return false;
   if(!isLegalMove(state.board,from.x,from.y,to.x,to.y)) return false;
+  settleClock(state.turn); state.passes=0;
   const captured=state.board[to.y][to.x] ? {...state.board[to.y][to.x]} : null;
   const nb=applyMoveToBoard(state.board,from.x,from.y,to.x,to.y);
   state.board=nb; state.lastMove={from,to}; state.moveNo++; state.turn=state.turn==='red'?'blue':'red';
@@ -368,7 +372,7 @@ function hostApplyMove(from,to){
   state.check=inCheck(state.board,enemy)?enemy:null;
   const any=hasAnyLegalMove(state.board,enemy);
   let resultTag='';
-  if(!any){ state.status='finished'; state.winner=mover; resultTag='외통'; setNotice(`${mover==='red'?'초':'한'}의 외통수!`); }
+  if(!any&&state.check){ state.status='finished'; state.winner=mover; state.reason='외통'; resultTag='외통'; setNotice(`${mover==='red'?'초':'한'}의 외통수!`); }
   else if(state.check){ resultTag='장군'; setNotice(`${enemy==='red'?'초':'한'} 장군!`); }
   else setNotice('');
   state.history.push({text:notationMove(p,from.x,from.y,to.x,to.y),captured,check:resultTag});
@@ -378,8 +382,16 @@ function hostApplyMove(from,to){
   return true;
 }
 
+function hostApplyPass(sd){
+  if(!state||state.status!=='playing'||state.turn!==sd||state.check===sd) return false;
+  settleClock(sd); state.passes++; state.moveNo++; state.turn=sd==='red'?'blue':'red'; state.lastMove=null; state.check=null;
+  state.history.push({text:`${sd==='red'?'초':'한'} 한수쉼`,captured:null,check:''});
+  if(state.passes>=2){const r=scoreOf(state.board,'red'),b=scoreOf(state.board,'blue');state.status='finished';state.winner=r>b?'red':'blue';state.reason=`계가 초 ${r} : 한 ${b}`;setNotice(`${state.reason} — ${state.winner==='red'?'초':'한'} 승리`);}
+  else setNotice(`${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
+  state.rematch={red:false,blue:false}; broadcast(); drawBoard(); return true;
+}
 function localSelect(x,y){
-  if(!state||state.status!=='playing'||!side||!dc||dc.readyState!=='open') return;
+  if(!state||state.status!=='playing'||!side||!online()) return;
   const p=state.board[y][x];
   if(selected){
     if(selected.x===x&&selected.y===y){selected=null;drawBoard();return;}
@@ -411,18 +423,62 @@ async function waitIceGathering(pc, timeout=8000){
 const b64u=u8=>{let s='';u8.forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const unb64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');t+='='.repeat((4-t.length%4)%4);return Uint8Array.from(atob(t),c=>c.charCodeAt(0))};
 async function pipe(u8,Stream){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new Stream('deflate-raw'))).arrayBuffer())}
-async function encodeSignal(obj){ // 가능하면 압축해서 코드를 짧게
+const grp=t=>t.match(/.{1,5}/g).join(' ');
+// ---- 초단축 코드: SDP에서 꼭 필요한 값(지문·ICE 정보·후보 주소)만 바이너리로 담고, 받는 쪽에서 SDP를 다시 조립 ----
+const hex2u8=h=>Uint8Array.from(h.split(':').map(x=>parseInt(x,16)));
+const u82hex=u=>[...u].map(x=>x.toString(16).toUpperCase().padStart(2,'0')).join(':');
+function ipv6bytes(a){ if(a.includes('.'))return null; const [h,t]=a.split('::'); const hp=h?h.split(':'):[], tp=t?t.split(':'):[]; if(t===undefined&&hp.length!==8)return null; const w=[...hp,...(t===undefined?[]:Array(8-hp.length-tp.length).fill('0')),...tp]; return w.length===8?w.flatMap(x=>{const n=parseInt(x||'0',16);return [n>>8,n&255]}):null; }
+function packSdp(d){
+  try{
+    const t=d.sdp, fp=t.match(/a=fingerprint:sha-256 ([0-9A-Fa-f:]+)/), uf=(t.match(/a=ice-ufrag:(\S+)/)||[])[1], pw=(t.match(/a=ice-pwd:(\S+)/)||[])[1];
+    if(!fp||!uf||!pw||uf.length>255||pw.length>255||(d.type!=='offer'&&d.type!=='answer'))return null;
+    const out=[d.type==='answer'?0x41:0x40,...hex2u8(fp[1]),uf.length,...[...uf].map(c=>c.charCodeAt(0)),pw.length,...[...pw].map(c=>c.charCodeAt(0))];
+    if(out.length!==3+32+uf.length+pw.length)return null;
+    const cs=[],seen=new Set();
+    for(const m of t.matchAll(/a=candidate:\S+ 1 udp \d+ (\S+) (\d+) typ (host|srflx|relay)/g)){
+      const [,addr,port,typ]=m; if(seen.has(addr+port))continue; seen.add(addr+port); let kind,b;
+      if(/^\d+\.\d+\.\d+\.\d+$/.test(addr)){kind=0;b=addr.split('.').map(Number);}
+      else if(/^[0-9a-f-]{36}\.local$/i.test(addr)){kind=2;b=addr.slice(0,36).replace(/-/g,'').match(/../g).map(x=>parseInt(x,16));}
+      else if(addr.includes(':')&&!/^fe80/i.test(addr)){kind=1;b=ipv6bytes(addr);if(!b)continue;} else continue;
+      cs.push([['host','srflx','relay'].indexOf(typ)|kind<<2,...b,port>>8,port&255]);
+    }
+    out.push(cs.length); cs.forEach(c=>out.push(...c)); return Uint8Array.from(out);
+  }catch{return null}
+}
+function unpackSdp(u){
+  let i=0; const ans=u[i++]===0x41, fp=u82hex(u.slice(i,i+32)); i+=32;
+  const rd=()=>{const n=u[i++],r=String.fromCharCode(...u.slice(i,i+n));i+=n;return r};
+  const uf=rd(),pw=rd(),n=u[i++],cl=[];
+  for(let k=0;k<n;k++){
+    const f=u[i++],typ=['host','srflx','relay'][f&3],kind=f>>2; let addr;
+    if(kind===0){addr=[...u.slice(i,i+4)].join('.');i+=4}
+    else if(kind===1){const w=[];for(let j=0;j<16;j+=2)w.push(((u[i+j]<<8)|u[i+j+1]).toString(16));addr=w.join(':');i+=16}
+    else{const h=[...u.slice(i,i+16)].map(x=>x.toString(16).padStart(2,'0')).join('');addr=`${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}.local`;i+=16}
+    const port=(u[i]<<8)|u[i+1]; i+=2;
+    cl.push(`a=candidate:${k+1} 1 udp ${(typ==='host'?2113937151:typ==='srflx'?1677729535:16777215)-k} ${addr} ${port} typ ${typ}`+(typ==='host'?'':' raddr 0.0.0.0 rport 0'));
+  }
+  const sdp=['v=0','o=- 1 2 IN IP4 127.0.0.1','s=-','t=0 0','a=group:BUNDLE 0','m=application 9 UDP/DTLS/SCTP webrtc-datachannel','c=IN IP4 0.0.0.0',...cl,'a=end-of-candidates',`a=ice-ufrag:${uf}`,`a=ice-pwd:${pw}`,`a=fingerprint:sha-256 ${fp}`,`a=setup:${ans?'active':'actpass'}`,'a=mid:0','a=sctp-port:5000','a=max-message-size:262144'].join('\r\n')+'\r\n';
+  const type=ans?'answer':'offer'; return {type,sdp:{type,sdp}};
+}
+async function encodeSignal(obj){ // 1순위: 초단축 코드, 실패 시 압축 코드
+  const pk=packSdp(obj.sdp); if(pk)return grp('k.'+b64u(pk));
   const u8=new TextEncoder().encode(JSON.stringify(obj));
-  if(typeof CompressionStream==='function'){try{return 'z.'+b64u(await pipe(u8,CompressionStream))}catch{}}
-  return b64u(u8);
+  if(typeof CompressionStream==='function'){try{return grp('z.'+b64u(await pipe(u8,CompressionStream)))}catch{}}
+  return grp(b64u(u8));
 }
 async function decodeSignal(str){
-  try{str=str.replace(/\s+/g,''); const u8=str.startsWith('z.')?await pipe(unb64u(str.slice(2)),DecompressionStream):unb64u(str); return JSON.parse(new TextDecoder().decode(u8));}
+  try{str=str.replace(/\s+/g,''); if(str.startsWith('k.'))return unpackSdp(unb64u(str.slice(2))); const u8=str.startsWith('z.')?await pipe(unb64u(str.slice(2)),DecompressionStream):unb64u(str); return JSON.parse(new TextDecoder().decode(u8));}
   catch(e){throw new Error('연결 코드 형식이 올바르지 않습니다.');}
 }
 
+function startSolo(){
+  cleanupPeer(); solo=true; timeLimitMs=(+timeSel.value||0)*60000;
+  state=initialState(); state.names={red:getName(),blue:getName()}; selected=null;
+  setRole('host','red'); sidePill.textContent='모드: 혼자 두기'; setConnection(true,'혼자 두기');
+  clockBase=Date.now(); showView('game'); setNotice('초가 먼저 둡니다.'); log('혼자 두기 시작','system'); drawBoard();
+}
 async function makeHost(){
-  cleanupPeer(); role='host'; side='red'; setRole('host','red'); resetClientState();
+  timeLimitMs=(+timeSel.value||0)*60000; cleanupPeer(); role='host'; side='red'; setRole('host','red'); resetClientState();
   pc=new RTCPeerConnection(RTC_CONFIG); dc=pc.createDataChannel('janggi',{ordered:true}); setupDataChannel();
   pc.onconnectionstatechange=handleConnState;
   pc.oniceconnectionstatechange=handleIceState;
@@ -451,7 +507,7 @@ function showSignal(step,output=''){
 function setupDataChannel(){
   if(!dc) return;
   dc.onopen=()=>{setConnection(true,'연결됨'); lastPong=Date.now(); startHeartbeat(); signalArea.classList.add('hidden'); setNotice(role==='host'?'연결 완료 — 초가 선공입니다.':'연결 완료 — 한이 초의 수를 기다립니다.'); log('P2P 연결 성공','system');
-    if(role==='host'){broadcast();} else send({type:'HELLO',role:'guest'}); drawBoard();
+    showView('game'); if(role==='host'){state.names.red=getName(); clockBase=Date.now(); broadcast();} else send({type:'HELLO',role:'guest',name:getName()}); drawBoard();
   };
   dc.onclose=()=>{setConnection(false,'연결 종료');stopHeartbeat();setNotice('상대 연결이 끊어졌습니다.');log('상대 연결 종료','bad');drawBoard()};
   dc.onerror=()=>{log('데이터 채널 오류','bad')};
@@ -467,7 +523,7 @@ function handleIceState(){
   if(s==='failed') {setConnection(false,'ICE 연결 실패'); log('직접 P2P 연결에 실패했습니다. 다른 네트워크에서 다시 시도해 보세요.','bad');}
 }
 function startHeartbeat(){stopHeartbeat();heartbeatTimer=setInterval(()=>{
-  if(!dc||dc.readyState!=='open') return;
+  if(!online()) return;
   send({type:'PING',t:Date.now()});
   if(Date.now()-lastPong>12000){unresp=true;setConnection(false,'응답 없음');setNotice('상대방의 응답이 없습니다. 연결이 끊길 수 있습니다.');}
 },3000)}
@@ -478,48 +534,51 @@ function handleMessage(raw){
   lastPong=Date.now(); if(unresp){unresp=false;setConnection(true,'연결됨');setNotice('');}
   if(m.type==='PING'){send({type:'PONG',t:m.t});return}
   if(m.type==='PONG'){return}
-  if(m.type==='HELLO'){ if(role==='host'&&state) broadcast(); return; }
+  if(m.type==='HELLO'){ if(role==='host'&&state){ if(m.name) state.names.blue=String(m.name).slice(0,12); broadcast(); drawBoard(); } return; }
   if(role==='host'){
     if(m.type==='MOVE'){
       const ok=c=>c&&Number.isInteger(c.x)&&Number.isInteger(c.y)&&inBoard(c.x,c.y);
       if(!ok(m.from)||!ok(m.to)) return;
       if(state.status!=='playing'||state.turn!=='blue'){send({type:'ERROR',msg:'지금은 한 차례가 아닙니다.'});return;}
       if(hostApplyMove(m.from,m.to)) log('상대(한)의 착수를 반영했습니다.','system'); else send({type:'ERROR',msg:'유효하지 않은 수입니다.'});
+    } else if(m.type==='PASS'){ hostApplyPass('blue');
     } else if(m.type==='RESIGN'){
       if(state.status==='playing'){state.status='finished';state.winner='red';state.check=null;broadcast();drawBoard();setNotice('한의 기권으로 초 승리');log('상대가 기권했습니다.','warn');}
     } else if(m.type==='REMATCH'){
       state.rematch.blue=true; broadcast(); drawBoard(); maybeRestart();
     }
   } else {
-    if(m.type==='STATE'){state=m.state;selected=null;drawBoard();updateGuestNotice();}
+    if(m.type==='STATE'){state=m.state;selected=null;clockBase=Date.now();drawBoard();updateGuestNotice();}
     else if(m.type==='ERROR'){setNotice(m.msg||'요청이 거부되었습니다.');log(m.msg||'요청 거부','warn');}
   }
 }
 function updateGuestNotice(){
   if(!state)return;
-  if(state.status==='finished'){setNotice(`${state.winner==='red'?'초':'한'} 승리 — 재대국을 선택하세요.`);}
+  if(state.status==='finished'){setNotice(`${state.reason?state.reason+' — ':''}${state.winner==='red'?'초':'한'} 승리 — 재대국을 선택하세요.`);}
   else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`); else setNotice('');
 }
 function resign(){
   if(!state||state.status!=='playing')return;
   if(!confirm('정말 기권할까요?'))return;
   if(role==='host'){
-    state.status='finished';state.winner='blue';state.check=null;broadcast();drawBoard();setNotice('초의 기권으로 한 승리');log('내가 기권했습니다.','warn');
+    const lo=solo?state.turn:'red';state.status='finished';state.winner=lo==='red'?'blue':'red';state.check=null;broadcast();drawBoard();setNotice(`${lo==='red'?'초':'한'}의 기권으로 ${state.winner==='red'?'초':'한'} 승리`);log('기권했습니다.','warn');
   }else{send({type:'RESIGN'});resignBtn.disabled=true;setNotice('기권 요청을 전송했습니다.');}
 }
 function requestRematch(){
-  if(!state||state.status!=='finished'||!dc||dc.readyState!=='open')return;
+  if(!state||state.status!=='finished'||!online())return;
+  if(solo){const nm=state.names;state=initialState();state.names=nm;clockBase=Date.now();selected=null;side='red';drawBoard();setNotice('새 대국 — 초 선공');return;}
   state.rematch[side]=true;
   rematchBtn.disabled=true;
   if(role==='host'){broadcast();drawBoard();maybeRestart();} else {send({type:'REMATCH'});setNotice('재대국 동의 전송');}
   drawBoard();
 }
 function maybeRestart(){
-  if(role==='host' && state.rematch.red && state.rematch.blue){state=initialState();broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
+  if(role==='host' && state.rematch.red && state.rematch.blue){const nm=state.names; state=initialState(); state.names=nm; clockBase=Date.now(); broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
 }
-function cleanupPeer(){stopHeartbeat();try{dc?.close()}catch{} try{pc?.close()}catch{} dc=null;pc=null;pendingSignalMode=null;pendingLocalCode='';}
+function cleanupPeer(){solo=false;stopHeartbeat();try{dc?.close()}catch{} try{pc?.close()}catch{} dc=null;pc=null;pendingSignalMode=null;pendingLocalCode='';}
 
 // UI wiring
+$('soloBtn').onclick=startSolo;
 createBtn.onclick=()=>makeHost().catch(e=>{log(e.message||String(e),'bad');alert(e.message||String(e))});
 joinBtn.onclick=()=>{cleanupPeer();role='guest';side='blue';setRole('guest','blue');signalArea.classList.remove('hidden');signalStep.innerHTML='방장의 <b>offer 코드</b>를 입력하고 적용하면 응답 코드가 생성됩니다.';signalInput.value='';signalOutput.value='';pendingSignalMode='guest-offer';signalApplyBtn.disabled=false;copySignalBtn.disabled=true;resetClientState();setNotice('방장 코드를 기다리는 중입니다.');};
 signalApplyBtn.onclick=()=>{
@@ -532,12 +591,14 @@ signalApplyBtn.onclick=()=>{
   })();
 };
 copySignalBtn.onclick=async()=>{try{await navigator.clipboard.writeText(signalOutput.value);setNotice('내 코드를 복사했습니다.');}catch{signalOutput.select();document.execCommand('copy');setNotice('내 코드를 복사했습니다.')}};
+passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
 resignBtn.onclick=resign; rematchBtn.onclick=requestRematch;
 $('resetUiBtn').onclick=()=>location.reload();
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden'); $('closeHelp').onclick=()=>$('helpModal').classList.add('hidden');
 $('helpModal').addEventListener('click',e=>{if(e.target.id==='helpModal')e.currentTarget.classList.add('hidden')});
 
-buildGrid(); state=null; setConnection(false,'연결 안 됨');
+try{nameInput.value=localStorage.getItem('jg_name')||''}catch{} nameInput.oninput=()=>{try{localStorage.setItem('jg_name',nameInput.value)}catch{}};
+showView('lobby'); buildGrid(); state=null; setConnection(false,'연결 안 됨');
 </script>
 </body>
 </html>
