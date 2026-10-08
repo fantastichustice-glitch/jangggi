@@ -24,7 +24,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 .side-label{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:14px;border:2px solid transparent;box-shadow:0 2px 10px rgba(60,30,30,.07)}.side-label.active{border-color:var(--y);box-shadow:0 0 0 3px rgba(254,229,0,.5)}
 .avatar{width:38px;height:38px;flex:none;display:grid;place-items:center;font-size:20px;font-weight:900;background:#f7e4b0;border-radius:50%;border:2px solid var(--wood)}.side-label.red .avatar{color:var(--cho)}.side-label.blue .avatar{color:var(--han)}
 .info{display:flex;flex-direction:column;min-width:0;flex:1}.side-label .name{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.side-label .captured{font-size:11px;color:var(--mut)}
-.clk{font-variant-numeric:tabular-nums;font-weight:900;font-size:16px;background:var(--br);color:#fff;border-radius:10px;padding:5px 10px;min-width:62px;text-align:center}.clk.low{background:var(--han)}
+.clk{font-variant-numeric:tabular-nums;font-weight:900;font-size:16px;background:var(--br);color:#fff;border-radius:10px;padding:5px 10px;min-width:84px;text-align:center}.clk.low{background:var(--han)}.clk.byo{background:#b45309}
 .board-wrap{width:min(100%,max(300px,calc((100dvh - 330px)*.9)));margin:0 auto}.board{container-type:inline-size;position:relative;width:100%;aspect-ratio:9/10;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.35),transparent 40%),linear-gradient(135deg,#efc87f,#dfae5f);border-radius:10px;border:6px solid #a87c3a;box-shadow:0 8px 20px rgba(60,30,30,.25);user-select:none;touch-action:manipulation}
 .board-grid{position:absolute;inset:5.2% 4.6%;overflow:visible}.palace-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}.palace-lines line{stroke:var(--wood);stroke-width:1.3;vector-effect:non-scaling-stroke;stroke-linecap:round}
 .cell{position:absolute;width:calc(100%/8);height:calc(100%/9);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;z-index:2;filter:drop-shadow(0 2px 1.5px rgba(40,20,0,.3))}
@@ -47,9 +47,28 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <div class="hero"><div class="big"><span>楚</span></div><h1>친구와 한 판 둘까요?</h1><p>서버 없이 두 브라우저가 직접 연결됩니다</p></div>
   <section class="card"><h3>👤 대국 설정</h3>
     <label class="field">내 이름 (상대에게 표시)<input id="nameInput" class="input" maxlength="12" placeholder="이름 입력"></label>
-    <label class="field" style="margin:0">대국 시계 (방장 설정 적용)<select id="timeSel" class="input"><option value="0">없음</option><option value="5">5분</option><option value="10" selected>10분</option><option value="20">20분</option><option value="30">30분</option></select></label>
+    <label class="field">내 차림새<select id="formationSel" class="input">
+      <option value="wonang">원앙마</option>
+      <option value="yanggwima">양귀마</option>
+      <option value="leftWonang">좌원앙마</option>
+      <option value="rightWonang">우원앙마</option>
+    </select></label>
+    <div class="row" style="align-items:flex-end"><label class="field" style="margin:0;flex:1">기본 시간<select id="timeSel" class="input"><option value="0">없음</option><option value="1">1분</option><option value="3">3분</option><option value="5">5분</option><option value="10" selected>10분</option><option value="20">20분</option><option value="30">30분</option></select></label>
+    <label class="field" style="margin:0;flex:1">초읽기 (수당)<select id="byoSel" class="input"><option value="0">없음</option><option value="10">10초</option><option value="20">20초</option><option value="30" selected>30초</option><option value="60">60초</option></select></label></div>
+    <div class="muted" style="margin-top:8px">기본 시간을 다 쓰면 한 수마다 초읽기 시간이 주어지고, 초과하면 시간패입니다. 방장(혼자 두기는 본인) 설정이 적용됩니다. 둘 다 '없음'이면 시계가 꺼집니다.</div>
   </section>
-  <section class="card"><h3>🧑 혼자 두기</h3><button id="soloBtn" class="secondary" style="width:100%">혼자 두기 (초·한 번갈아 두기)</button><div class="muted" style="margin-top:8px">연결 없이 한 화면에서 양쪽을 번갈아 둡니다. 시계·한수쉼·계가도 그대로 적용됩니다.</div></section>
+  <section class="card"><h3>🧑 혼자 두기</h3>
+    <div class="row">
+      <label class="field" style="margin:0;flex:1">초 차림새<select id="soloRedFormation" class="input">
+        <option value="wonang">원앙마</option><option value="yanggwima">양귀마</option><option value="leftWonang">좌원앙마</option><option value="rightWonang">우원앙마</option>
+      </select></label>
+      <label class="field" style="margin:0;flex:1">한 차림새<select id="soloBlueFormation" class="input">
+        <option value="wonang">원앙마</option><option value="yanggwima">양귀마</option><option value="leftWonang">좌원앙마</option><option value="rightWonang">우원앙마</option>
+      </select></label>
+    </div>
+    <button id="soloBtn" class="secondary" style="width:100%;margin-top:8px">혼자 두기 (초·한 번갈아 두기)</button>
+    <div class="muted" style="margin-top:8px">1인 대국은 초·한의 차림새를 각각 정합니다. 연결 대국에서는 각자 자신의 차림새를 정합니다.</div>
+  </section>
   <section class="card"><h3>🔌 상대와 연결</h3>
     <div class="stack">
       <button id="createBtn" class="primary">방 만들기</button>
@@ -82,7 +101,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="redCaptured" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="blueCaptured" class="captured-pieces"></div></div></div>
   <div id="log" class="log" style="max-height:100px"></div>
   <div class="divider"></div><h2>📖 규칙</h2>
-  <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>두 궁이 마주 보는 빅장은 허용되며, 상대가 다음 수에 해소하지 못하면 계가로 승패를 정합니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
+  <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>두 궁이 마주 보는 빅장은 <b>양측 기물 점수(덤 제외)가 모두 30점 이하일 때만</b> 둘 수 있으며, 상대가 다음 수에 해소하지 못하면 계가로 승패를 정합니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
   <button id="closeLog" class="primary" style="width:100%;margin-top:12px">닫기</button>
 </div></div>
 <div id="helpModal" class="modal hidden"><div class="modal-card">
@@ -112,10 +131,12 @@ const $ = id => document.getElementById(id);
 const boardEl = $('board'), gridEl = $('grid');
 const turnText = $('turnText'), noticeEl = $('notice'), logEl = $('log');
 const connDot = $('connDot'), connText = $('connText'), rolePill = $('rolePill'), sidePill = $('sidePill');
-const passBtn=$('passBtn'), nameInput=$('nameInput'), timeSel=$('timeSel'), resignBtn = $('resignBtn'), rematchBtn = $('rematchBtn'), rematchStatus = $('rematchStatus');
+const passBtn=$('passBtn'), nameInput=$('nameInput'), timeSel=$('timeSel'), byoSel=$('byoSel'), resignBtn = $('resignBtn'), rematchBtn = $('rematchBtn'), rematchStatus = $('rematchStatus');
 const turnBadge=$('turnBadge'), moveCounter=$('moveCounter'), redLabel=$('redLabel'), blueLabel=$('blueLabel'), moveLog=$('moveLog'), redCaptured=$('redCaptured'), blueCaptured=$('blueCaptured');
 const signalArea = $('signalArea'), signalStep = $('signalStep'), signalInput = $('signalInput'), signalOutput = $('signalOutput');
 const createBtn = $('createBtn'), joinBtn = $('joinBtn'), signalApplyBtn = $('signalApplyBtn'), copySignalBtn = $('copySignalBtn');
+const formationSel = $('formationSel'), soloRedFormation = $('soloRedFormation'), soloBlueFormation = $('soloBlueFormation');
+const FORMATION_LABELS = {wonang:'원앙마', yanggwima:'양귀마', leftWonang:'좌원앙마', rightWonang:'우원앙마'};
 
 let role = null; // host | guest
 let side = null; // red | blue
@@ -127,19 +148,34 @@ let pendingSignalMode = null; // host-answer | guest-offer
 let pendingLocalCode = '';
 let selected = null;
 let state = null;
-let solo = false, unresp = false, timeLimitMs = 0, clockBase = Date.now();
+let solo = false, unresp = false, timeLimitMs = 0, byoMs = 0, clockBase = Date.now();
 const SCORE={R:13,C:7,H:5,E:3,G:3,S:2,K:0};
 const online=()=>solo||(dc&&dc.readyState==='open');
 const getName=()=>nameInput.value.trim().slice(0,12)||'익명';
+const rawScore=(b,sd)=>scoreOf(b,sd)-(sd==='blue'?1.5:0); // 덤 제외 기물 점수
+const bikAllowed=b=>rawScore(b,'red')<=30&&rawScore(b,'blue')<=30;
 function scoreOf(b,sd){let t=sd==='blue'?1.5:0;for(const r of b)for(const q of r)if(q&&q.side===sd)t+=SCORE[q.type];return t}
 function showView(v){$('lobbyView').classList.toggle('hidden',v!=='lobby');$('gameView').classList.toggle('hidden',v!=='game');}
 function settleClock(sd){const c=state.clock;if(c&&c.limit)c[sd]=Math.max(0,c[sd]-(Date.now()-clockBase));clockBase=Date.now();}
-function clockLeft(sd){const c=state?.clock;if(!c||!c.limit)return null;let v=c[sd];if(state.status==='playing'&&state.turn===sd)v-=Date.now()-clockBase;return Math.max(0,v)}
+function clockInfo(sd){ // 기본 시간을 다 쓰면 한 수마다 초읽기가 주어진다
+  const c=state?.clock; if(!c||!c.limit) return null;
+  const m=c[sd], byo=c.byo||0, e=(state.status==='playing'&&state.turn===sd)?Date.now()-clockBase:0;
+  if(!byo) return {ms:Math.max(0,m-e),byo:false};
+  if(m>0&&e<=m) return {ms:m-e,byo:false};
+  return {ms:Math.max(0,byo-(e-m)),byo:true};
+}
 function fmt(ms){if(ms==null)return '∞';const t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
-function renderClock(){if(!state)return;for(const c of ['red','blue']){const v=clockLeft(c);$(c+'Clk').classList.toggle('low',v!=null&&v<30000);}$('redClk').textContent=fmt(clockLeft('red'));$('blueClk').textContent=fmt(clockLeft('blue'));}
+function renderClock(){
+  if(!state)return;
+  for(const sd of ['red','blue']){
+    const i=clockInfo(sd),el=$(sd+'Clk');
+    el.textContent=!i?'∞':i.byo?'초읽기 '+Math.ceil(i.ms/1000):fmt(i.ms);
+    el.classList.toggle('byo',!!i&&i.byo); el.classList.toggle('low',!!i&&(i.byo?i.ms<=10000:!state.clock.byo&&i.ms<30000));
+  }
+}
 setInterval(()=>{
   if(!state)return; renderClock();
-  if(role==='host'&&state.status==='playing'&&online()&&state.clock.limit&&clockLeft(state.turn)<=0){
+  if(role==='host'&&state.status==='playing'&&online()&&state.clock.limit&&clockInfo(state.turn).ms<=0){
     const l=state.turn; settleClock(l); state.status='finished'; state.winner=l==='red'?'blue':'red'; state.reason='시간 초과'; state.check=null;
     broadcast(); drawBoard(); setNotice(`${l==='red'?'초':'한'} 시간 초과 — ${state.winner==='red'?'초':'한'} 승리`);
   }
@@ -168,19 +204,26 @@ function setRole(r, s) {
   $('gameView').dataset.me=s; buildGrid(); // 한(참가자)은 판을 뒤집어 내 말이 아래에 오도록
   if(state) drawBoard();
 }
-function emptyBoard() {
+function emptyBoard(redFormation='wonang', blueFormation='wonang') {
   const b = Array.from({length:10},()=>Array(9).fill(null));
   const put = (x,y,side,type)=>b[y][x]={side,type};
 
-  // 한국 장기 표준 초반 배치(원앙마 차림)
-  // 궁은 궁성의 2선 중앙에 두고, 뒷줄 중앙은 비워 둡니다.
-  // 한(위): 1선 = 차-마-상-사-빈칸-사-상-마-차
-  //          2선 = 중앙에 궁
-  //          3선 = 양쪽 포
-  //          4선 = 5개 병
-  // 초(아래)도 대칭 배치합니다.
-  const back = ['R','H','E','G',null,'G','E','H','R'];
-  back.forEach((t,x)=>{ if(t) put(x,0,'blue',t); });
+  // 차림새:
+  // 원앙마   = 마상상마
+  // 좌원앙마 = 마상마상
+  // 우원앙마 = 상마상마
+  // 양귀마   = 마마상상
+  // 배열의 x=1,2,6,7 위치가 각각 위 네 글자의 순서가 됩니다.
+  const formationBack = {
+    wonang:      ['R','H','E','G',null,'G','E','H','R'],
+    leftWonang:  ['R','H','E','G',null,'G','H','E','R'],
+    rightWonang: ['R','E','H','G',null,'G','E','H','R'],
+    yanggwima:   ['R','H','H','G',null,'G','E','E','R']
+  };
+  const redBack = formationBack[redFormation] || formationBack.wonang;
+  const blueBack = formationBack[blueFormation] || formationBack.wonang;
+
+  blueBack.forEach((t,x)=>{ if(t) put(x,0,'blue',t); });
   put(4,1,'blue','K');
   [1,7].forEach(x=>put(x,2,'blue','C'));
   [0,2,4,6,8].forEach(x=>put(x,3,'blue','S'));
@@ -188,12 +231,12 @@ function emptyBoard() {
   [0,2,4,6,8].forEach(x=>put(x,6,'red','S'));
   [1,7].forEach(x=>put(x,7,'red','C'));
   put(4,8,'red','K');
-  back.forEach((t,x)=>{ if(t) put(x,9,'red',t); });
+  redBack.forEach((t,x)=>{ if(t) put(x,9,'red',t); });
 
   return b;
 }
-function initialState(){
-  return {board:emptyBoard(),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,bikjang:false,reason:'',names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,limit:timeLimitMs},rematch:{red:false,blue:false}};
+function initialState(redFormation=formationSel?.value||'wonang', blueFormation='wonang'){
+  return {board:emptyBoard(redFormation,blueFormation),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,bikjang:false,reason:'',formations:{red:redFormation,blue:blueFormation},names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,byo:byoMs,limit:timeLimitMs+byoMs},rematch:{red:false,blue:false}};
 }
 function pieceLabel(p){return p?PIECES[p.side][p.type]:''}
 function capturedByColor(color){return state?.captured?.[color]||[];}
@@ -313,7 +356,7 @@ function legalMovesFrom(b,x,y){
   return pseudoMoves(b,x,y).filter(m=>{
     const target=b[m.y][m.x]; if(target?.type==='K') return false; // checkmate is represented by no legal replies.
     const nb=applyMoveToBoard(b,x,y,m.x,m.y);
-    return !inCheck(nb,p.side);
+    return !inCheck(nb,p.side); // 30점 초과 상황에서도 빅장 상태 자체는 허용
   });
 }
 function isLegalMove(b,fx,fy,tx,ty){return legalMovesFrom(b,fx,fy).some(m=>m.x===tx&&m.y===ty)}
@@ -333,7 +376,8 @@ function drawBoard(){
     const p=state.board[y][x];
     if(p){const d=document.createElement('div');d.className='piece '+(p.side==='red'?'red':'blue')+' type-'+p.type+(p.type==='K'?' general':'');if(selected&&selected.x===x&&selected.y===y)d.classList.add('sel');const label=PIECES[p.side][p.type];d.textContent=label;d.setAttribute('aria-label',p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label);d.title=p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label;c.appendChild(d);}
   }
-  const bikOn=!!state.bikjang&&state.status==='playing'; noticeEl.classList.toggle('alert',bikOn);
+  const bikOn=!!state.bikjang&&state.status==='playing'&&bikAllowed(state.board);
+  noticeEl.classList.toggle('alert',bikOn);
   if(bikOn) for(const c of ['red','blue']){const g=generalPos(state.board,c); if(g) cellAt(g[0],g[1])?.classList.add('bik');}
   if(selected){for(const m of legalMovesFrom(state.board,selected.x,selected.y)){const c=cellAt(m.x,m.y);if(c)c.classList.add(state.board[m.y][m.x]?'capture':'highlight')}}
   const turnSide=state.turn;
@@ -381,8 +425,13 @@ function hostApplyMove(from,to){
   else setNotice('');
   const facing=generalsFacing(state.board); // 빅장(대궁): 상대가 다음 수에 해소하지 못하면 계가
   if(state.status==='playing'){
-    if(facing&&state.bikjang){ endByScore('빅장'); resultTag='빅장'; }
-    else if(facing){ resultTag+=' 빅장'; setNotice(`빅장! ${enemy==='red'?'초가':'한이'} 해소하지 않으면 계가로 종료됩니다.`); }
+    if(facing&&state.bikjang&&bikAllowed(state.board)){ endByScore('빅장'); resultTag='빅장'; }
+    else if(facing){
+      resultTag+=' 빅장';
+      setNotice(bikAllowed(state.board)
+        ? `빅장! ${enemy==='red'?'초가':'한이'} 해소하지 않으면 계가로 종료됩니다.`
+        : '빅장 상태입니다. (양측 기물 점수가 30점을 초과하여 경기 종료 없이 계속됩니다.)');
+    }
   }
   state.bikjang=facing;
   state.history.push({text:notationMove(p,from.x,from.y,to.x,to.y),captured,check:resultTag});
@@ -398,13 +447,22 @@ function hostApplyPass(sd){
   state.history.push({text:`${sd==='red'?'초':'한'} 한수쉼`,captured:null,check:''});
   const facing=generalsFacing(state.board);
   if(state.passes>=2) endByScore('연속 한수쉼');
-  else if(facing&&state.bikjang) endByScore('빅장');
-  else setNotice(facing?'빅장 상태입니다. 해소하지 않으면 계가로 종료됩니다.':`${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
+  else if(facing&&state.bikjang&&bikAllowed(state.board)) endByScore('빅장');
+  else setNotice(facing
+    ? (bikAllowed(state.board)
+      ? '빅장 상태입니다. 해소하지 않으면 계가로 종료됩니다.'
+      : '빅장 상태입니다. (양측 기물 점수가 30점을 초과하여 경기 종료 없이 계속됩니다.)')
+    : `${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
   state.bikjang=facing;
   state.rematch={red:false,blue:false}; broadcast(); drawBoard(); return true;
 }
+function bikBlocked(f,t){
+  const b=state.board,p=b[f.y][f.x]; if(!p||!pseudoMoves(b,f.x,f.y).some(m=>m.x===t.x&&m.y===t.y)) return false;
+  const nb=applyMoveToBoard(b,f.x,f.y,t.x,t.y); return generalsFacing(nb)&&!bikAllowed(nb)&&!inCheck(nb,p.side);
+}
 function confirmBikjang(from,to){ // 빅장이 걸린 상태에서 해소하지 않는 수를 두려 할 때 확인
-  if(!state.bikjang||!generalsFacing(applyMoveToBoard(state.board,from.x,from.y,to.x,to.y))) return true;
+  const nb=applyMoveToBoard(state.board,from.x,from.y,to.x,to.y);
+  if(!state.bikjang||!generalsFacing(nb)||!bikAllowed(nb)) return true;
   return confirm('빅장 상태입니다.\n이 수로는 두 궁이 계속 마주 보게 되어 빅장이 성립하고, 계가(점수)로 대국이 끝납니다.\n\n그래도 두시겠어요?');
 }
 function localSelect(x,y){
@@ -491,13 +549,13 @@ async function decodeSignal(str){
 }
 
 function startSolo(){
-  cleanupPeer(); solo=true; timeLimitMs=(+timeSel.value||0)*60000;
-  state=initialState(); state.names={red:getName(),blue:getName()}; selected=null;
+  cleanupPeer(); solo=true; timeLimitMs=(+timeSel.value||0)*60000; byoMs=(+byoSel.value||0)*1000;
+  state=initialState(soloRedFormation.value,soloBlueFormation.value); state.names={red:getName(),blue:getName()}; selected=null;
   setRole('host','red'); sidePill.textContent='모드: 혼자 두기'; setConnection(true,'혼자 두기');
   clockBase=Date.now(); showView('game'); setNotice('초가 먼저 둡니다.'); log('혼자 두기 시작','system'); drawBoard();
 }
 async function makeHost(){
-  timeLimitMs=(+timeSel.value||0)*60000; cleanupPeer(); role='host'; side='red'; setRole('host','red'); resetClientState();
+  timeLimitMs=(+timeSel.value||0)*60000; byoMs=(+byoSel.value||0)*1000; cleanupPeer(); role='host'; side='red'; setRole('host','red'); state=initialState(formationSel.value,'wonang'); selected=null; drawBoard();
   pc=new RTCPeerConnection(RTC_CONFIG); dc=pc.createDataChannel('janggi',{ordered:true}); setupDataChannel();
   pc.onconnectionstatechange=handleConnState;
   pc.oniceconnectionstatechange=handleIceState;
@@ -507,7 +565,7 @@ async function makeHost(){
   setConnection(false,'연결 대기'); setNotice('친구가 응답 코드를 보내면 적용하세요.'); log('방 생성: 초 배정','system');
 }
 async function makeGuestFromOffer(code){
-  cleanupPeer(); role='guest'; side='blue'; setRole('guest','blue'); resetClientState();
+  cleanupPeer(); role='guest'; side='blue'; setRole('guest','blue'); state=initialState('wonang',formationSel.value); selected=null; drawBoard();
   const offer=await decodeSignal(code); if(offer.type!=='offer') throw new Error('방장용 offer 코드가 아닙니다.');
   pc=new RTCPeerConnection(RTC_CONFIG); pc.ondatachannel=e=>{dc=e.channel;setupDataChannel()}; pc.onconnectionstatechange=handleConnState; pc.oniceconnectionstatechange=handleIceState;
   await pc.setRemoteDescription(offer.sdp); const ans=await pc.createAnswer(); await pc.setLocalDescription(ans); await waitIceGathering(pc);
@@ -526,7 +584,7 @@ function showSignal(step,output=''){
 function setupDataChannel(){
   if(!dc) return;
   dc.onopen=()=>{setConnection(true,'연결됨'); lastPong=Date.now(); startHeartbeat(); signalArea.classList.add('hidden'); setNotice(role==='host'?'연결 완료 — 초가 선공입니다.':'연결 완료 — 한이 초의 수를 기다립니다.'); log('P2P 연결 성공','system');
-    showView('game'); if(role==='host'){state.names.red=getName(); clockBase=Date.now(); broadcast();} else send({type:'HELLO',role:'guest',name:getName()}); drawBoard();
+    showView('game'); if(role==='host'){state.names.red=getName(); clockBase=Date.now(); broadcast();} else send({type:'HELLO',role:'guest',name:getName(),formation:formationSel.value}); drawBoard();
   };
   dc.onclose=()=>{setConnection(false,'연결 종료');stopHeartbeat();setNotice('상대 연결이 끊어졌습니다.');log('상대 연결 종료','bad');drawBoard()};
   dc.onerror=()=>{log('데이터 채널 오류','bad')};
@@ -553,7 +611,15 @@ function handleMessage(raw){
   lastPong=Date.now(); if(unresp){unresp=false;setConnection(true,'연결됨');setNotice('');}
   if(m.type==='PING'){send({type:'PONG',t:m.t});return}
   if(m.type==='PONG'){return}
-  if(m.type==='HELLO'){ if(role==='host'&&state){ if(m.name) state.names.blue=String(m.name).slice(0,12); broadcast(); drawBoard(); } return; }
+  if(m.type==='HELLO'){
+    if(role==='host'&&state){
+      if(m.name) state.names.blue=String(m.name).slice(0,12);
+      const f=FORMATION_LABELS[m.formation]?m.formation:'wonang';
+      if(state.moveNo===0){ state.formations.blue=f; state.board=emptyBoard(state.formations.red,state.formations.blue); }
+      broadcast(); drawBoard();
+    }
+    return;
+  }
   if(role==='host'){
     if(m.type==='MOVE'){
       const ok=c=>c&&Number.isInteger(c.x)&&Number.isInteger(c.y)&&inBoard(c.x,c.y);
@@ -574,7 +640,9 @@ function handleMessage(raw){
 function updateGuestNotice(){
   if(!state)return;
   if(state.status==='finished'){setNotice(`${state.reason?state.reason+' — ':''}${state.winner==='red'?'초':'한'} 승리 — 재대국을 선택하세요.`);}
-  else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`); else if(state.bikjang) setNotice('빅장! 해소하지 않으면 계가로 종료됩니다.'); else setNotice('');
+  else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`);
+  else if(state.bikjang) setNotice(bikAllowed(state.board)?'빅장! 해소하지 않으면 계가로 종료됩니다.':'빅장 상태입니다. 경기 종료 없이 계속됩니다.');
+  else setNotice('');
 }
 function resign(){
   if(!state||state.status!=='playing')return;
@@ -585,14 +653,14 @@ function resign(){
 }
 function requestRematch(){
   if(!state||state.status!=='finished'||!online())return;
-  if(solo){const nm=state.names;state=initialState();state.names=nm;clockBase=Date.now();selected=null;side='red';drawBoard();setNotice('새 대국 — 초 선공');return;}
+  if(solo){const nm=state.names;const fs=state.formations||{red:soloRedFormation.value,blue:soloBlueFormation.value};state=initialState(fs.red,fs.blue);state.names=nm;clockBase=Date.now();selected=null;side='red';drawBoard();setNotice('새 대국 — 초 선공');return;}
   state.rematch[side]=true;
   rematchBtn.disabled=true;
   if(role==='host'){broadcast();drawBoard();maybeRestart();} else {send({type:'REMATCH'});setNotice('재대국 동의 전송');}
   drawBoard();
 }
 function maybeRestart(){
-  if(role==='host' && state.rematch.red && state.rematch.blue){const nm=state.names; state=initialState(); state.names=nm; clockBase=Date.now(); broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
+  if(role==='host' && state.rematch.red && state.rematch.blue){const nm=state.names;const fs=state.formations||{red:formationSel.value,blue:'wonang'}; state=initialState(fs.red,fs.blue); state.names=nm; clockBase=Date.now(); broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
 }
 function cleanupPeer(){solo=false;stopHeartbeat();try{dc?.close()}catch{} try{pc?.close()}catch{} dc=null;pc=null;pendingSignalMode=null;pendingLocalCode='';}
 
@@ -610,7 +678,7 @@ signalApplyBtn.onclick=()=>{
   })();
 };
 copySignalBtn.onclick=async()=>{try{await navigator.clipboard.writeText(signalOutput.value);setNotice('내 코드를 복사했습니다.');}catch{signalOutput.select();document.execCommand('copy');setNotice('내 코드를 복사했습니다.')}};
-passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(state.bikjang&&!confirm('빅장 상태에서 한수쉼하면 빅장이 성립해 계가(점수)로 대국이 끝납니다.\n\n그래도 쉴까요?'))return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
+passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(state.bikjang&&bikAllowed(state.board)&&!confirm('빅장 상태에서 한수쉼하면 빅장이 성립해 계가(점수)로 대국이 끝납니다.\n\n그래도 쉴까요?'))return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
 resignBtn.onclick=resign; rematchBtn.onclick=requestRematch;
 $('resetUiBtn').onclick=()=>location.reload();
 $('helpBtn').onclick=()=>$('helpModal').classList.remove('hidden'); $('closeHelp').onclick=()=>$('helpModal').classList.add('hidden');
