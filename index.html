@@ -79,6 +79,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 .kibo-info{font-size:13px;font-weight:800;text-align:center;line-height:1.5;min-height:40px;margin:8px 0 4px}
 .kibo-ctrl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kibo-ctrl button{padding:11px 4px;font-size:16px}
 .kibo-slider{width:100%;margin:10px 0 2px;accent-color:#b45309}
+.kibo-form{font-size:12px;font-weight:800;text-align:center;color:#5b4636;background:#fffdf3;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin:0 0 8px;line-height:1.6}.kibo-form:empty{display:none}
 .kibo-err{color:var(--han);font-size:13px;font-weight:700;line-height:1.5;margin:6px 0}
 .pill.snd{cursor:pointer;user-select:none}
 </style>
@@ -141,7 +142,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 </main>
 </div>
 <div id="logModal" class="modal hidden"><div class="modal-card">
-  <h2>📜 대국 기록</h2><div id="moveLog" class="log"></div>
+  <h2>📜 대국 기록</h2><div id="logFormation" class="kibo-form"></div><div id="moveLog" class="log"></div>
   <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="redCaptured" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="blueCaptured" class="captured-pieces"></div></div></div>
   <div id="log" class="log" style="max-height:100px"></div>
   <div class="divider"></div><h2>📖 규칙</h2>
@@ -158,7 +159,7 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <div id="kiboError" class="kibo-err hidden"></div>
   <div id="kiboViewer" class="hidden">
     <div class="kibo-wrap"><div class="board"><div class="board-grid" id="kiboGrid"></div></div></div>
-    <div id="kiboInfo" class="kibo-info"></div>
+    <div id="kiboForm" class="kibo-form"></div><div id="kiboInfo" class="kibo-info"></div>
     <div class="kibo-ctrl"><button id="kFirst" aria-label="처음">⏮</button><button id="kPrev" aria-label="이전">◀</button><button id="kNext" aria-label="다음">▶</button><button id="kLast" aria-label="끝">⏭</button></div>
     <input id="kiboSlider" class="kibo-slider" type="range" min="0" max="0" value="0">
     <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="kiboCapRed" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="kiboCapBlue" class="captured-pieces"></div></div></div>
@@ -456,6 +457,8 @@ function drawBoard(){
   redLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'red'); blueLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'blue')+' (덤 포함)';
   redLabel.querySelector('.name').textContent='초 · '+(state.names?.red||''); blueLabel.querySelector('.name').textContent='한 · '+(state.names?.blue||''); renderClock();
   renderCaptured(redCaptured,capturedByColor('red')); renderCaptured(blueCaptured,capturedByColor('blue'));
+  const ff=state.formations||{}, nn=state.names||{};
+  $('logFormation').innerHTML=`<span style="color:var(--cho)">초${nn.red?'('+nn.red.replace(/[<>&]/g,'')+')':''}</span> 차림새 ${FORMATION_LABELS[ff.red]||'-'} · <span style="color:var(--han)">한${nn.blue?'('+nn.blue.replace(/[<>&]/g,'')+')':''}</span> 차림새 ${FORMATION_LABELS[ff.blue]||'-'}`;
   moveLog.innerHTML='';
   const hist=state.history||[];
   if(!hist.length){moveLog.innerHTML='<div class="muted">아직 착수가 없습니다.</div>';} else hist.forEach((h,i)=>{const r=document.createElement('div');r.className='move-row';const n=document.createElement('div');n.className='move-no';n.textContent=(i+1)+'.';const t=document.createElement('div');t.textContent=h.text+(h.captured?' × '+pieceLabel(h.captured):'');if(h.check)t.textContent+=' '+h.check;r.append(n,t);moveLog.appendChild(r);});
@@ -836,7 +839,9 @@ for(const sel of [kiboRedF,kiboBlueF])for(const k in FORMATION_LABELS){const o=d
 let kibo=null, kiboIdx=0, kiboCells=[];
 function buildKibo(){
   const f=state.formations||{red:'wonang',blue:'wonang'};
-  const L=['[장기 기보]',`초 차림새: ${FORMATION_LABELS[f.red]||f.red}`,`한 차림새: ${FORMATION_LABELS[f.blue]||f.blue}`];
+  const nm=state.names||{}, L=['[장기 기보]'];
+  if(nm.red||nm.blue)L.push(`대국자: 초 ${nm.red||'-'} / 한 ${nm.blue||'-'}`);
+  L.push(`초 차림새: ${FORMATION_LABELS[f.red]||f.red}`,`한 차림새: ${FORMATION_LABELS[f.blue]||f.blue}`);
   (state.history||[]).forEach((h,i)=>L.push(`${i+1}. ${h.text}${h.captured?' × '+pieceLabel(h.captured):''}${h.check?' '+h.check:''}`));
   if(state.status==='finished'&&state.winner)L.push(`결과: ${sn(state.winner)} 승리${state.reason?' ('+state.reason+')':''}`);
   return L.join('\n');
@@ -859,7 +864,7 @@ function parseKibo(text,rf,bf){
   for(const raw of text.split(/\r?\n/)){
     const line=raw.trim(); if(!line)continue;
     if(/^결과/.test(line)){result=line.replace(/^결과\s*[:：]?\s*/,'');continue;}
-    if(/차림새|^\[/.test(line))continue;
+    if(/차림새|^\[|^대국자/.test(line))continue;
     const m=line.match(MOVE), n=moves.length+1;
     if(m){
       const fx=m[1]-1,fy=10-m[2],tx=m[3]-1,ty=10-m[4];
@@ -894,7 +899,7 @@ function renderKibo(){
   if(mv&&mv.check){const g=generalPos(b,mv.check); if(g){kiboCells[g[1]*9+g[0]].classList.add('incheck');addRing(kiboCells[g[1]*9+g[0]],'chk-ring');}}
   let info=kiboIdx?`${kiboIdx} / ${total}수 · ${mv.text}`:`시작 위치 (총 ${total}수)`;
   if(kiboIdx===total&&kibo.result)info+=`\n결과: ${kibo.result}`;
-  $('kiboInfo').style.whiteSpace='pre-line'; $('kiboInfo').textContent=info;
+  $('kiboForm').innerHTML=`<span style="color:var(--cho)">초</span> 차림새 ${FORMATION_LABELS[kibo.rf]||'-'} · <span style="color:var(--han)">한</span> 차림새 ${FORMATION_LABELS[kibo.bf]||'-'}`; $('kiboInfo').style.whiteSpace='pre-line'; $('kiboInfo').textContent=info;
   const caps=mv?mv.caps:{red:[],blue:[]}; renderCaptured($('kiboCapRed'),caps.red); renderCaptured($('kiboCapBlue'),caps.blue);
   kiboSlider.max=total; kiboSlider.value=kiboIdx;
   $('kFirst').disabled=$('kPrev').disabled=kiboIdx===0; $('kNext').disabled=$('kLast').disabled=kiboIdx===total;
