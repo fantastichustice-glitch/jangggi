@@ -38,10 +38,53 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
 .capture-tray{display:flex;gap:10px;margin:8px 0}.captured-group{flex:1}.captured-title{font-size:11px;color:var(--mut);margin-bottom:3px}.captured-pieces{display:flex;gap:2px;flex-wrap:wrap;min-height:24px}.mini-piece{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#f7e4b0;border:1px solid var(--wood)}.mini-piece.red{color:var(--cho)}.mini-piece.blue{color:var(--han)}.empty-capture{font-size:11px;color:var(--mut)}
 .notice.alert{color:var(--han);font-weight:800}.cell.bik{filter:drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 2px #ef4444)}
 .rules{font-size:12px;line-height:1.7;color:#5b4636}
+
+/* ===== 장군 표시 ===== */
+.statusbar.in-check{background:#ffecec;box-shadow:0 0 0 2px var(--han),0 2px 12px rgba(201,48,44,.35);animation:sbPulse 1s ease-in-out infinite}
+.statusbar.in-check .notice{font-size:14px;color:var(--han);font-weight:900}
+.check-chip{background:var(--han);color:#fff;font-weight:900;font-size:16px;padding:6px 12px;border-radius:99px;white-space:nowrap;animation:chipBlink 1s ease-in-out infinite}
+.board.in-check{border-color:#d93a35;animation:boardFlash 1s ease-in-out infinite}
+.side-label.incheck{border-color:var(--han);box-shadow:0 0 0 3px rgba(201,48,44,.35)}
+.cell.incheck{animation:kingGlow 1s ease-in-out infinite}
+.chk-ring{position:absolute;width:114%;aspect-ratio:1;border-radius:50%;border:3px solid #ef4444;z-index:6;pointer-events:none;animation:ringPulse 1s ease-in-out infinite}
+.chk-ring.atk{width:98%;border:3px dashed #f59e0b;animation:none}
+.check-banner{position:absolute;left:50%;top:50%;z-index:30;pointer-events:none;opacity:0;text-align:center;padding:2.5cqw 9cqw 3cqw;border-radius:5cqw;background:linear-gradient(#e5463f,#b52620);color:#fff;border:.8cqw solid #fff;box-shadow:0 2cqw 6cqw rgba(0,0,0,.45);transform:translate(-50%,-50%) scale(.4)}
+.check-banner b{display:block;font-size:20cqw;line-height:1.05;letter-spacing:-.02em;text-shadow:0 .6cqw 0 rgba(0,0,0,.25)}
+.check-banner span{display:block;font-size:4cqw;font-weight:800;margin-top:.5cqw}
+.check-banner.opp{background:linear-gradient(#ffe94d,#f2cf00);color:var(--br);border-color:var(--br)}
+.check-banner.opp b{text-shadow:none}
+.check-banner.show{animation:chkFlash 2s ease both}
+@keyframes chkFlash{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}10%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}18%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}}
+@keyframes sbPulse{50%{background:#ffd9d6}}
+@keyframes chipBlink{50%{transform:scale(1.12);background:#e5463f}}
+@keyframes boardFlash{50%{box-shadow:0 8px 20px rgba(60,30,30,.25),0 0 0 7px rgba(217,58,53,.4)}}
+@keyframes kingGlow{0%,100%{filter:drop-shadow(0 0 3px #ef4444) drop-shadow(0 0 6px #ef4444)}50%{filter:drop-shadow(0 0 8px #ff2a2a) drop-shadow(0 0 16px #ff2a2a)}}
+@keyframes ringPulse{0%,100%{transform:scale(.95);opacity:1}50%{transform:scale(1.1);opacity:.55}}
+/* ===== 대국 결과 (화면 중앙) ===== */
+.result-overlay{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:20px;background:rgba(60,30,30,.62);backdrop-filter:blur(2px)}
+.result-card{width:100%;max-width:340px;text-align:center;background:#fff9d6;border:4px solid var(--y);border-radius:26px;padding:26px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.4);animation:resPop .45s cubic-bezier(.2,1.3,.4,1)}
+.result-card.lose{background:#f1ede6;border-color:#b9ad98}
+.res-emblem{width:84px;height:84px;margin:0 auto 12px;display:grid;place-items:center;font-size:44px;font-weight:900;background:var(--wood);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.res-emblem span{display:grid;place-items:center;width:92%;height:92%;background:#f7e4b0;clip-path:inherit}
+.res-emblem.cho{color:var(--cho)}.res-emblem.han{color:var(--han)}.result-card.lose .res-emblem{filter:grayscale(.8)}
+.res-title{font-size:46px;font-weight:900;line-height:1.1;color:#8a5a00}.result-card.lose .res-title{color:#6b5f52}
+.res-sub{margin-top:8px;font-size:15px;font-weight:800;line-height:1.4}
+.res-rematch{margin-top:6px;font-size:12px;color:var(--mut);min-height:16px}
+.res-actions{display:grid;gap:8px;margin-top:14px}
+@keyframes resPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.statusbar.in-check,.check-chip,.board.in-check,.cell.incheck,.chk-ring,.result-card{animation:none!important}}
+
+/* ===== 기보 읽기 · 소리 ===== */
+.kibo-wrap{width:min(100%,380px);margin:10px auto 6px}
+.kibo-info{font-size:13px;font-weight:800;text-align:center;line-height:1.5;min-height:40px;margin:8px 0 4px}
+.kibo-ctrl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kibo-ctrl button{padding:11px 4px;font-size:16px}
+.kibo-slider{width:100%;margin:10px 0 2px;accent-color:#b45309}
+.kibo-err{color:var(--han);font-size:13px;font-weight:700;line-height:1.5;margin:6px 0}
+.pill.snd{cursor:pointer;user-select:none}
 </style>
 </head>
 <body>
-<header class="appbar"><div class="brand"><span class="logo">將</span>장기 마루<small>P2P</small></div><div class="status"><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
+<header class="appbar"><div class="brand"><span class="logo">將</span>장기 마루<small>P2P</small></div><div class="status"><span class="pill snd" id="soundPill" role="button" aria-label="소리 켜기/끄기">🔊</span><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
 <div class="wrap">
 <main id="lobbyView" class="lobby">
   <div class="hero"><div class="big"><span>楚</span></div><h1>친구와 한 판 둘까요?</h1><p>서버 없이 두 브라우저가 직접 연결됩니다</p></div>
@@ -84,12 +127,13 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
       <div class="muted">게임 서버는 쓰지 않습니다. 연결 성공률을 높이기 위해 공개 STUN 서버만 보조로 사용하며, 수/상태는 저장되지 않습니다.</div>
     </div>
   </section>
+  <section class="card"><h3>📜 기보</h3><button id="kiboOpenBtn" class="secondary" style="width:100%">기보 읽기 (붙여 넣어 판 보기)</button></section>
 </main>
 <main id="gameView" class="game hidden" data-me="red">
-  <div class="statusbar"><div><div id="turnText" class="turn">먼저 방을 연결하세요.</div><div id="notice" class="notice"></div></div><span id="turnBadge" class="turn-badge"><span class="mini-dot"></span><span></span></span><span id="moveCounter" class="move-counter">수 0</span></div>
+  <div id="statusbar" class="statusbar"><div><div id="turnText" class="turn">먼저 방을 연결하세요.</div><div id="notice" class="notice"></div></div><span id="turnBadge" class="turn-badge"><span class="mini-dot"></span><span></span></span><span id="checkChip" class="check-chip hidden">⚠ 장군!</span><button id="resultBtn" class="small primary hidden">결과 보기</button><span id="moveCounter" class="move-counter">수 0</span></div>
   <div class="table">
     <div id="blueLabel" class="side-label blue"><div class="avatar">漢</div><div class="info"><span class="name">한</span><span class="captured">점수</span></div><span class="clk" id="blueClk"></span></div>
-    <div class="board-wrap"><div id="board" class="board"><div class="board-grid" id="grid"><svg class="palace-lines" viewBox="0 0 8 9" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/><line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/><line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/><line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/><line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/><line x1="0" y1="0" x2="0" y2="9"/><line x1="1" y1="0" x2="1" y2="9"/><line x1="2" y1="0" x2="2" y2="9"/><line x1="3" y1="0" x2="3" y2="9"/><line x1="4" y1="0" x2="4" y2="9"/><line x1="5" y1="0" x2="5" y2="9"/><line x1="6" y1="0" x2="6" y2="9"/><line x1="7" y1="0" x2="7" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/><line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/><line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/></svg></div></div></div>
+    <div class="board-wrap"><div id="board" class="board"><div class="board-grid" id="grid"><svg class="palace-lines" viewBox="0 0 8 9" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/><line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/><line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/><line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/><line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/><line x1="0" y1="0" x2="0" y2="9"/><line x1="1" y1="0" x2="1" y2="9"/><line x1="2" y1="0" x2="2" y2="9"/><line x1="3" y1="0" x2="3" y2="9"/><line x1="4" y1="0" x2="4" y2="9"/><line x1="5" y1="0" x2="5" y2="9"/><line x1="6" y1="0" x2="6" y2="9"/><line x1="7" y1="0" x2="7" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/><line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/><line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/></svg></div><div id="checkBanner" class="check-banner"><b>장군!</b><span></span></div></div></div>
     <div id="redLabel" class="side-label red"><div class="avatar">楚</div><div class="info"><span class="name">초</span><span class="captured">점수</span></div><span class="clk" id="redClk"></span></div>
   </div>
   <div class="actionbar"><button id="passBtn" disabled>한수쉼</button><button id="resignBtn" class="danger" disabled>기권</button><button id="rematchBtn" disabled>재대국</button><button id="logBtn">기록·규칙</button><button id="resetUiBtn" class="ghost wide">로비로 나가기</button></div>
@@ -102,7 +146,24 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <div id="log" class="log" style="max-height:100px"></div>
   <div class="divider"></div><h2>📖 규칙</h2>
   <div class="rules">차·포·마·상·사·졸/병·궁의 한국 장기 규칙과 궁성 대각선을 적용합니다.<br>포는 기물 하나를 넘어야 하며 포를 넘거나 잡을 수 없습니다. 마·상은 경로가 막히면 못 갑니다.<br>두 궁이 마주 보는 빅장은 <b>양측 기물 점수(덤 제외)가 모두 30점 이하일 때만</b> 둘 수 있으며, 상대가 다음 수에 해소하지 못하면 계가로 승패를 정합니다.<br>한수쉼은 장군 상태가 아닐 때 가능하며, 양쪽이 연속으로 쉬면 계가(차13·포7·마5·상3·사3·졸2, 한 덤 1.5)로 승패를 정합니다.<br>호스트 브라우저가 닫히면 방도 종료됩니다.</div>
-  <button id="closeLog" class="primary" style="width:100%;margin-top:12px">닫기</button>
+  <div class="row" style="margin-top:12px"><button id="kiboCopyBtn" class="secondary" style="flex:1">기보 복사</button><button id="kiboFromLogBtn" class="secondary" style="flex:1">기보 읽기</button></div>
+  <button id="closeLog" class="primary" style="width:100%;margin-top:8px">닫기</button>
+</div></div>
+<div id="kiboModal" class="modal hidden"><div class="modal-card">
+  <h2>📜 기보 읽기</h2>
+  <textarea id="kiboInput" class="codebox" placeholder="기보를 붙여 넣으세요.&#10;예)&#10;1. 초 卒 9,4 → 9,5&#10;2. 한 兵 1,7 → 1,6"></textarea>
+  <div class="row" style="margin:8px 0"><label class="field" style="margin:0;flex:1">초 차림새<select id="kiboRedF" class="input"></select></label><label class="field" style="margin:0;flex:1">한 차림새<select id="kiboBlueF" class="input"></select></label></div>
+  <div class="muted">이 게임 기록 형식(열,행 좌표)을 읽습니다. 기보에 차림새가 적혀 있으면 그대로 따르고, 없으면 위 선택값을 씁니다.</div>
+  <button id="kiboLoadBtn" class="primary" style="width:100%;margin:8px 0">기보 불러오기</button>
+  <div id="kiboError" class="kibo-err hidden"></div>
+  <div id="kiboViewer" class="hidden">
+    <div class="kibo-wrap"><div class="board"><div class="board-grid" id="kiboGrid"></div></div></div>
+    <div id="kiboInfo" class="kibo-info"></div>
+    <div class="kibo-ctrl"><button id="kFirst" aria-label="처음">⏮</button><button id="kPrev" aria-label="이전">◀</button><button id="kNext" aria-label="다음">▶</button><button id="kLast" aria-label="끝">⏭</button></div>
+    <input id="kiboSlider" class="kibo-slider" type="range" min="0" max="0" value="0">
+    <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="kiboCapRed" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="kiboCapBlue" class="captured-pieces"></div></div></div>
+  </div>
+  <button id="closeKibo" class="primary" style="width:100%;margin-top:8px">닫기</button>
 </div></div>
 <div id="helpModal" class="modal hidden"><div class="modal-card">
   <h2>🔌 P2P 연결 방법</h2>
@@ -112,6 +173,13 @@ button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#
   <p><b>4. 방장</b>이 응답 코드를 붙여 넣고 <b>코드 적용</b>을 누르면 연결되어 대국 화면으로 넘어갑니다.</p>
   <p class="muted">일부 엄격한 NAT/방화벽 환경에서는 직접 연결이 실패할 수 있습니다.</p>
   <button id="closeHelp" class="primary" style="width:100%">확인</button>
+</div></div>
+<div id="resultOverlay" class="result-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive"><div id="resultCard" class="result-card">
+  <div id="resEmblem" class="res-emblem cho"><span id="resChar">楚</span></div>
+  <div id="resTitle" class="res-title"></div>
+  <div id="resSub" class="res-sub"></div>
+  <div id="resRematch" class="res-rematch"></div>
+  <div class="res-actions"><button id="resRematchBtn" class="primary">재대국</button><button id="resViewBtn" class="secondary">판 보기</button><button id="resLobbyBtn" class="ghost">로비로 나가기</button></div>
 </div></div>
 <script>
 'use strict';
@@ -364,7 +432,7 @@ function hasAnyLegalMove(b,side){for(let y=0;y<10;y++)for(let x=0;x<9;x++){if(b[
 function notationMove(p,fx,fy,tx,ty){return `${p.side==='red'?'초':'한'} ${PIECES[p.side][p.type]} ${fx+1},${10-fy} → ${tx+1},${10-ty}`}
 
 function drawBoard(){
-  cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to','bik');c.innerHTML='';});
+  cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to','bik','incheck');c.innerHTML='';});
   if(!state){ turnBadge.classList.add('hidden'); moveCounter.textContent='수 0'; return; }
   if(solo&&state.status==='playing') side=state.turn; // 혼자 두기: 차례인 쪽이 곧 내 진영
   if(state.lastMove){
@@ -377,7 +445,7 @@ function drawBoard(){
     if(p){const d=document.createElement('div');d.className='piece '+(p.side==='red'?'red':'blue')+' type-'+p.type+(p.type==='K'?' general':'');if(selected&&selected.x===x&&selected.y===y)d.classList.add('sel');const label=PIECES[p.side][p.type];d.textContent=label;d.setAttribute('aria-label',p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label);d.title=p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label;c.appendChild(d);}
   }
   const bikOn=!!state.bikjang&&state.status==='playing'&&bikAllowed(state.board);
-  noticeEl.classList.toggle('alert',bikOn);
+  noticeEl.classList.toggle('alert',bikOn||(state.status==='playing'&&!!state.check));
   if(bikOn) for(const c of ['red','blue']){const g=generalPos(state.board,c); if(g) cellAt(g[0],g[1])?.classList.add('bik');}
   if(selected){for(const m of legalMovesFrom(state.board,selected.x,selected.y)){const c=cellAt(m.x,m.y);if(c)c.classList.add(state.board[m.y][m.x]?'capture':'highlight')}}
   const turnSide=state.turn;
@@ -394,6 +462,7 @@ function drawBoard(){
   passBtn.disabled=state.status!=='playing'||state.turn!==side||state.check===side||!online();
   resignBtn.disabled=state.status!=='playing'||!online();
   rematchBtn.disabled=state.status!=='finished'||!online();
+  updateCheckUI(); updateResultUI(); updateSound();
   rematchStatus.textContent = state.status==='finished' ? `재대국: 초 ${state.rematch.red?'✅':'⬜'} · 한 ${state.rematch.blue?'✅':'⬜'}` : '대국 종료 후 재대국을 요청할 수 있습니다.';
 }
 function setNotice(t){noticeEl.textContent=t}
@@ -628,7 +697,7 @@ function handleMessage(raw){
       if(hostApplyMove(m.from,m.to)) log('상대(한)의 착수를 반영했습니다.','system'); else send({type:'ERROR',msg:'유효하지 않은 수입니다.'});
     } else if(m.type==='PASS'){ hostApplyPass('blue');
     } else if(m.type==='RESIGN'){
-      if(state.status==='playing'){state.status='finished';state.winner='red';state.check=null;broadcast();drawBoard();setNotice('한의 기권으로 초 승리');log('상대가 기권했습니다.','warn');}
+      if(state.status==='playing'){state.status='finished';state.winner='red';state.reason='기권';state.check=null;broadcast();drawBoard();setNotice('한의 기권으로 초 승리');log('상대가 기권했습니다.','warn');}
     } else if(m.type==='REMATCH'){
       state.rematch.blue=true; broadcast(); drawBoard(); maybeRestart();
     }
@@ -648,7 +717,7 @@ function resign(){
   if(!state||state.status!=='playing')return;
   if(!confirm('정말 기권할까요?'))return;
   if(role==='host'){
-    const lo=solo?state.turn:'red';state.status='finished';state.winner=lo==='red'?'blue':'red';state.check=null;broadcast();drawBoard();setNotice(`${lo==='red'?'초':'한'}의 기권으로 ${state.winner==='red'?'초':'한'} 승리`);log('기권했습니다.','warn');
+    const lo=solo?state.turn:'red';state.status='finished';state.winner=lo==='red'?'blue':'red';state.reason='기권';state.check=null;broadcast();drawBoard();setNotice(`${lo==='red'?'초':'한'}의 기권으로 ${state.winner==='red'?'초':'한'} 승리`);log('기권했습니다.','warn');
   }else{send({type:'RESIGN'});resignBtn.disabled=true;setNotice('기권 요청을 전송했습니다.');}
 }
 function requestRematch(){
@@ -663,6 +732,196 @@ function maybeRestart(){
   if(role==='host' && state.rematch.red && state.rematch.blue){const nm=state.names;const fs=state.formations||{red:formationSel.value,blue:'wonang'}; state=initialState(fs.red,fs.blue); state.names=nm; clockBase=Date.now(); broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
 }
 function cleanupPeer(){solo=false;stopHeartbeat();try{dc?.close()}catch{} try{pc?.close()}catch{} dc=null;pc=null;pendingSignalMode=null;pendingLocalCode='';}
+
+// =========================
+// 장군 알림 · 대국 결과(화면 중앙)
+// =========================
+const resultOverlay=$('resultOverlay'), checkBanner=$('checkBanner'), checkChip=$('checkChip'), statusbarEl=$('statusbar'), resultBtn=$('resultBtn'), resRematchBtn=$('resRematchBtn');
+let resultKey=null, checkKey=null;
+const sn=s=>s==='red'?'초':'한';
+const addRing=(c,cls)=>{if(!c)return;const i=document.createElement('i');i.className=cls;c.appendChild(i);};
+function flashCheck(chk){
+  const mine=!solo&&chk===side;
+  checkBanner.className='check-banner'+(!solo&&!mine?' opp':'');
+  checkBanner.querySelector('span').textContent=solo?`${sn(chk)}의 궁이 위험합니다`:mine?'내 궁이 위험해요! 피하거나 막으세요':'상대 궁을 공격 중!';
+  void checkBanner.offsetWidth; checkBanner.classList.add('show');
+}
+function updateCheckUI(){
+  const live=state.status==='playing'?state.check:null;
+  statusbarEl.classList.toggle('in-check',!!live); checkChip.classList.toggle('hidden',!live); boardEl.classList.toggle('in-check',!!live);
+  redLabel.classList.toggle('incheck',live==='red'); blueLabel.classList.toggle('incheck',live==='blue');
+  if(state.check){ // 외통으로 끝난 경우에도 궁 표시는 남김
+    const g=generalPos(state.board,state.check), foe=state.check==='red'?'blue':'red';
+    if(g){
+      const kc=cellAt(g[0],g[1]); kc?.classList.add('incheck'); addRing(kc,'chk-ring');
+      for(let y=0;y<10;y++)for(let x=0;x<9;x++){const p=state.board[y][x]; if(p&&p.side===foe&&pseudoMoves(state.board,x,y,true).some(m=>m.x===g[0]&&m.y===g[1])) addRing(cellAt(x,y),'chk-ring atk');} // 장군을 건 기물
+    }
+  }
+  if(live){ if(checkKey!==state.moveNo){checkKey=state.moveNo;flashCheck(live);} }
+  else if(!state.check) checkKey=null;
+}
+function resultWhy(){
+  const w=state.winner,r=state.reason||'';
+  if(r==='외통') return '외통수';
+  if(r==='기권') return solo?'기권':(w===side?'상대가 기권했습니다':'내가 기권했습니다');
+  if(r==='시간 초과') return solo?'시간 초과':(w===side?'상대 시간 초과':'내 시간 초과');
+  return r;
+}
+function syncResult(){
+  const mineReq=!solo&&!!state.rematch?.[side];
+  resRematchBtn.disabled=rematchBtn.disabled||mineReq; resRematchBtn.textContent=mineReq?'상대 응답 대기 중…':'재대국';
+  $('resRematch').textContent=solo?'':`재대국: 초 ${state.rematch.red?'✅':'⬜'} · 한 ${state.rematch.blue?'✅':'⬜'}`;
+}
+function showResult(){
+  const w=state.winner, lose=!solo&&!!w&&w!==side, why=resultWhy();
+  $('resultCard').className='result-card'+(lose?' lose':'');
+  $('resEmblem').className='res-emblem '+(w==='blue'?'han':'cho'); $('resChar').textContent=w==='blue'?'漢':'楚';
+  $('resTitle').textContent=!w?'대국 종료':solo?`${sn(w)} 승리!`:lose?'패배':'승리!';
+  $('resSub').textContent=w&&!solo?`${sn(w)} 승리${why?' · '+why:''}`:why;
+  syncResult(); resultOverlay.classList.remove('hidden');
+}
+function updateResultUI(){
+  const done=state.status==='finished';
+  resultBtn.classList.toggle('hidden',!done);
+  if(!done){resultKey=null;resultOverlay.classList.add('hidden');return;}
+  const k=`${state.moveNo}|${state.winner}|${state.reason}`;
+  if(k!==resultKey){resultKey=k;showResult();} else syncResult();
+}
+resultBtn.onclick=()=>{if(state&&state.status==='finished')showResult();};
+resRematchBtn.onclick=()=>requestRematch();
+$('resViewBtn').onclick=()=>resultOverlay.classList.add('hidden');
+$('resLobbyBtn').onclick=()=>$('resetUiBtn').click();
+resultOverlay.addEventListener('click',e=>{if(e.target===resultOverlay)resultOverlay.classList.add('hidden')});
+
+// =========================
+// 착수 소리 (WebAudio로 직접 합성 — 외부 파일 없음)
+// =========================
+let actx=null, noiseBuf=null, soundOn=true, soundNo=null;
+try{soundOn=localStorage.getItem('jg_sound')!=='off'}catch{}
+const soundPill=$('soundPill');
+function getCtx(){
+  if(!actx){const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null; actx=new AC();}
+  if(actx.state==='suspended')actx.resume();
+  if(!noiseBuf){noiseBuf=actx.createBuffer(1,Math.ceil(actx.sampleRate*.06),actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  return actx;
+}
+function playSound(kind){ // move | capture | pass
+  if(!soundOn)return; const c=getCtx(); if(!c)return;
+  const t=c.currentTime, out=c.createGain(); out.gain.value=.9; out.connect(c.destination);
+  const hit=(at,vol,f0,f1,nf)=>{ // 나무 '딱': 낮은 울림 + 짧은 노이즈 클릭
+    const o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(f0,at); o.frequency.exponentialRampToValueAtTime(f1,at+.09);
+    g.gain.setValueAtTime(vol,at); g.gain.exponentialRampToValueAtTime(.001,at+.12); o.connect(g); g.connect(out); o.start(at); o.stop(at+.13);
+    const n=c.createBufferSource(); n.buffer=noiseBuf; const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=nf; bp.Q.value=1.2; const ng=c.createGain();
+    ng.gain.setValueAtTime(vol*1.1,at); ng.gain.exponentialRampToValueAtTime(.001,at+.04); n.connect(bp); bp.connect(ng); ng.connect(out); n.start(at); n.stop(at+.05);
+  };
+  if(kind==='pass')hit(t,.12,500,300,3000);
+  else if(kind==='capture'){hit(t,.55,260,110,2200);hit(t+.07,.4,200,90,1500);} // 잡을 때는 두 번 '딱-딱'
+  else hit(t,.45,300,140,2600);
+}
+function updateSound(){ // 수가 늘어났을 때만 (내 수·상대 수 모두)
+  const n=state.moveNo;
+  if(soundNo!==null&&n>soundNo){const h=(state.history||[]).slice(-1)[0]; playSound(!h?'move':/한수쉼/.test(h.text)?'pass':h.captured?'capture':'move');}
+  soundNo=n;
+}
+function refreshSoundPill(){soundPill.textContent=soundOn?'🔊':'🔇';soundPill.title=soundOn?'소리 끄기':'소리 켜기';}
+soundPill.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('jg_sound',soundOn?'on':'off')}catch{} refreshSoundPill(); if(soundOn)playSound('move');};
+document.addEventListener('pointerdown',()=>{if(soundOn)getCtx()},{once:true}); // 모바일 브라우저는 첫 터치 때 오디오를 깨워야 함
+refreshSoundPill();
+
+// =========================
+// 기보 복사 · 기보 읽기
+// =========================
+const kiboModal=$('kiboModal'), kiboInput=$('kiboInput'), kiboRedF=$('kiboRedF'), kiboBlueF=$('kiboBlueF'), kiboErr=$('kiboError'), kiboViewer=$('kiboViewer'), kiboSlider=$('kiboSlider');
+for(const sel of [kiboRedF,kiboBlueF])for(const k in FORMATION_LABELS){const o=document.createElement('option');o.value=k;o.textContent=FORMATION_LABELS[k];sel.appendChild(o);}
+let kibo=null, kiboIdx=0, kiboCells=[];
+function buildKibo(){
+  const f=state.formations||{red:'wonang',blue:'wonang'};
+  const L=['[장기 기보]',`초 차림새: ${FORMATION_LABELS[f.red]||f.red}`,`한 차림새: ${FORMATION_LABELS[f.blue]||f.blue}`];
+  (state.history||[]).forEach((h,i)=>L.push(`${i+1}. ${h.text}${h.captured?' × '+pieceLabel(h.captured):''}${h.check?' '+h.check:''}`));
+  if(state.status==='finished'&&state.winner)L.push(`결과: ${sn(state.winner)} 승리${state.reason?' ('+state.reason+')':''}`);
+  return L.join('\n');
+}
+async function copyKibo(){
+  if(!state||!(state.history||[]).length){setNotice('복사할 기보가 아직 없습니다.');return;}
+  const t=buildKibo(), btn=$('kiboCopyBtn');
+  try{await navigator.clipboard.writeText(t)}catch{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+  btn.textContent='복사됨 ✓'; setTimeout(()=>btn.textContent='기보 복사',1500);
+}
+function parseKibo(text,rf,bf){
+  const inv={};for(const k in FORMATION_LABELS)inv[FORMATION_LABELS[k]]=k;
+  const mr=text.match(/초\s*차림새\s*[:：]\s*(\S+)/), mb=text.match(/한\s*차림새\s*[:：]\s*(\S+)/);
+  if(mr&&inv[mr[1]])rf=inv[mr[1]]; if(mb&&inv[mb[1]])bf=inv[mb[1]];
+  let b=emptyBoard(rf,bf), turn='red', result='', error='';
+  const boards=[b], moves=[], caps={red:[],blue:[]};
+  const norm=c=>c==='兵'?'卒':c==='漢'?'楚':c, other=x=>x==='red'?'blue':'red';
+  const MOVE=/(\d{1,2})\s*,\s*(\d{1,2})\s*(?:→|->|=>|>|-|~)\s*(\d{1,2})\s*,\s*(\d{1,2})/;
+  const snap=()=>({red:caps.red.slice(),blue:caps.blue.slice()});
+  for(const raw of text.split(/\r?\n/)){
+    const line=raw.trim(); if(!line)continue;
+    if(/^결과/.test(line)){result=line.replace(/^결과\s*[:：]?\s*/,'');continue;}
+    if(/차림새|^\[/.test(line))continue;
+    const m=line.match(MOVE), n=moves.length+1;
+    if(m){
+      const fx=m[1]-1,fy=10-m[2],tx=m[3]-1,ty=10-m[4];
+      const fail=why=>{error=`${n}번째 수를 적용할 수 없습니다: "${line}"\n${why}`;};
+      if(!inBoard(fx,fy)||!inBoard(tx,ty)){fail('좌표가 판 범위(열 1~9, 행 1~10)를 벗어났습니다.');break;}
+      const p=b[fy][fx], pre=line.slice(0,m.index);
+      const ch=(pre.match(/[車包馬象士卒兵楚漢]/)||[])[0], sd=(pre.match(/[초한]/)||[])[0];
+      if(!p||(sd&&(sd==='초'?'red':'blue')!==p.side)||(ch&&norm(ch)!==norm(PIECES[p.side][p.type]))){fail('그 위치에 해당 기물이 없습니다. 차림새 선택을 확인해 보세요.');break;}
+      const tgt=b[ty][tx]; if(tgt&&tgt.side===p.side){fail('자기 기물이 있는 칸으로는 이동할 수 없습니다.');break;}
+      const nb=applyMoveToBoard(b,fx,fy,tx,ty); if(tgt)caps[p.side].push({...tgt});
+      const foe=other(p.side), chk=inCheck(nb,foe);
+      moves.push({text:notationMove(p,fx,fy,tx,ty)+(tgt?' × '+pieceLabel(tgt):'')+(chk?' 장군':''),from:{x:fx,y:fy},to:{x:tx,y:ty},check:chk?foe:null,caps:snap()});
+      boards.push(nb); b=nb; turn=foe;
+    }else if(/한수쉼/.test(line)){
+      const g=(line.match(/(초|한)\s*한수쉼/)||[])[1], sd=g?(g==='초'?'red':'blue'):turn;
+      moves.push({text:`${sn(sd)} 한수쉼`,pass:true,check:null,caps:snap()}); boards.push(b); turn=other(sd);
+    }
+  }
+  if(!moves.length&&!error)error='읽을 수 있는 수가 없습니다. 예) 1. 초 卒 9,4 → 9,5';
+  return {boards,moves,result,error,rf,bf};
+}
+function buildKiboGrid(){
+  if(kiboCells.length)return; const g=$('kiboGrid');
+  g.appendChild(gridEl.querySelector('.palace-lines').cloneNode(true));
+  for(let y=0;y<10;y++)for(let x=0;x<9;x++){const c=document.createElement('div');c.className='cell';c.style.left=(x/8*100)+'%';c.style.top=(y/9*100)+'%';g.appendChild(c);kiboCells[y*9+x]=c;}
+}
+function renderKibo(){
+  const b=kibo.boards[kiboIdx], mv=kiboIdx?kibo.moves[kiboIdx-1]:null, total=kibo.moves.length;
+  kiboCells.forEach(c=>{c.className='cell';c.innerHTML='';});
+  for(let y=0;y<10;y++)for(let x=0;x<9;x++){const p=b[y][x]; if(!p)continue;const d=document.createElement('div');d.className='piece '+p.side+' type-'+p.type+(p.type==='K'?' general':'');d.textContent=PIECES[p.side][p.type];kiboCells[y*9+x].appendChild(d);}
+  if(mv&&!mv.pass){kiboCells[mv.from.y*9+mv.from.x].classList.add('last-from');kiboCells[mv.to.y*9+mv.to.x].classList.add('last-to');}
+  if(mv&&mv.check){const g=generalPos(b,mv.check); if(g){kiboCells[g[1]*9+g[0]].classList.add('incheck');addRing(kiboCells[g[1]*9+g[0]],'chk-ring');}}
+  let info=kiboIdx?`${kiboIdx} / ${total}수 · ${mv.text}`:`시작 위치 (총 ${total}수)`;
+  if(kiboIdx===total&&kibo.result)info+=`\n결과: ${kibo.result}`;
+  $('kiboInfo').style.whiteSpace='pre-line'; $('kiboInfo').textContent=info;
+  const caps=mv?mv.caps:{red:[],blue:[]}; renderCaptured($('kiboCapRed'),caps.red); renderCaptured($('kiboCapBlue'),caps.blue);
+  kiboSlider.max=total; kiboSlider.value=kiboIdx;
+  $('kFirst').disabled=$('kPrev').disabled=kiboIdx===0; $('kNext').disabled=$('kLast').disabled=kiboIdx===total;
+}
+function kiboGo(i){if(!kibo)return;kiboIdx=Math.max(0,Math.min(kibo.moves.length,i));renderKibo();}
+function loadKibo(){
+  const r=parseKibo(kiboInput.value,kiboRedF.value,kiboBlueF.value);
+  kiboRedF.value=r.rf; kiboBlueF.value=r.bf; kibo=r;
+  kiboErr.textContent=r.error; kiboErr.style.whiteSpace='pre-line'; kiboErr.classList.toggle('hidden',!r.error);
+  buildKiboGrid(); kiboViewer.classList.remove('hidden'); kiboGo(r.moves.length); // 에러가 있어도 적용된 부분까지 보여줌
+}
+function openKibo(fromGame){
+  $('logModal').classList.add('hidden'); kiboModal.classList.remove('hidden');
+  const f=state?.formations; if(f&&fromGame){kiboRedF.value=f.red;kiboBlueF.value=f.blue;}
+  if(fromGame&&state&&(state.history||[]).length){kiboInput.value=buildKibo();loadKibo();} // 진행 중인 대국 복기
+}
+$('kiboOpenBtn').onclick=()=>openKibo(false);
+$('kiboFromLogBtn').onclick=()=>openKibo(true);
+$('kiboCopyBtn').onclick=copyKibo;
+$('kiboLoadBtn').onclick=loadKibo;
+$('closeKibo').onclick=()=>kiboModal.classList.add('hidden');
+$('kFirst').onclick=()=>kiboGo(0); $('kPrev').onclick=()=>kiboGo(kiboIdx-1); $('kNext').onclick=()=>kiboGo(kiboIdx+1); $('kLast').onclick=()=>kiboGo(1e9);
+kiboSlider.oninput=()=>kiboGo(+kiboSlider.value);
+document.addEventListener('keydown',e=>{
+  if(kiboModal.classList.contains('hidden')||!kibo||['TEXTAREA','SELECT','INPUT'].includes(e.target.tagName))return;
+  if(e.key==='ArrowLeft')kiboGo(kiboIdx-1); else if(e.key==='ArrowRight')kiboGo(kiboIdx+1);
+});
 
 // UI wiring
 $('soloBtn').onclick=startSolo;
