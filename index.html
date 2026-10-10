@@ -1,2499 +1,942 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIY C — Fly If You Can</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;600;700&display=swap');
-        
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            background-color: #050811;
-            color: #d1d5db;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+<title>장기 마루 — P2P</title>
+<style>
+:root{--y:#FEE500;--yd:#d9bf00;--br:#3C1E1E;--bg:#FFF6CF;--line:#eadfb2;--mut:#8a7a55;--cho:#1f7a3d;--han:#c9302c;--wood:#6b4a24}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--bg);color:var(--br);font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;min-height:100dvh;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:12px 14px;background:#fff;font-weight:800;box-shadow:0 2px 0 rgba(60,30,30,.12),inset 0 0 0 1px var(--line)}button:active{transform:scale(.97)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.primary{background:var(--y);box-shadow:0 2px 0 var(--yd)}.danger{background:#fff0ee;color:var(--han)}.secondary{background:#fff}.ghost{background:transparent;box-shadow:none;color:var(--mut)}.small{padding:7px 10px;font-size:13px}.wide{grid-column:1/-1}
+.appbar{background:var(--y);display:flex;justify-content:space-between;align-items:center;padding:10px 14px;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:8px;font-size:18px;font-weight:900}.brand small{font-size:11px;background:var(--br);color:var(--y);padding:2px 7px;border-radius:99px}.logo{width:30px;height:30px;border-radius:9px;background:var(--br);color:var(--y);display:grid;place-items:center;font-weight:900}
+.status{display:flex;gap:6px}.pill{background:rgba(255,255,255,.7);padding:5px 10px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}#rolePill{display:none}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#9ca3af;margin-right:5px}.dot.ok{background:#16a34a}.dot.bad{background:#ef4444}
+.wrap{max-width:560px;margin:0 auto;padding:14px 12px 28px}.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(60,30,30,.08)}.card h3{margin:0 0 10px;font-size:15px}
+.lobby{display:flex;flex-direction:column;gap:12px}.hero{text-align:center;padding:18px 0 6px}.hero .big{width:76px;height:76px;margin:0 auto 10px;display:grid;place-items:center;font-size:40px;font-weight:900;color:var(--cho);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);background:var(--wood)}.hero .big span{display:grid;place-items:center;width:92%;height:92%;background:#f7e4b0;clip-path:inherit}.hero h1{margin:0;font-size:24px}.hero p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:13px;color:var(--mut);font-weight:700}.input{width:100%;background:#fffdf3;border:1.5px solid var(--line);border-radius:12px;padding:11px 12px}.input:focus{outline:2px solid var(--y);border-color:var(--y)}
+.stack{display:flex;flex-direction:column;gap:8px}.row{display:flex;gap:8px;align-items:center}.muted{color:var(--mut);font-size:12px;line-height:1.5}.divider{height:1px;background:var(--line);margin:10px 0}
+.codebox{width:100%;min-height:92px;resize:vertical;background:#fffdf3;border:1.5px solid var(--line);border-radius:12px;padding:10px;font-family:ui-monospace,Consolas,monospace;font-size:12px;word-break:break-all}
+.game{display:flex;flex-direction:column;gap:10px}.statusbar{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border-radius:14px;padding:9px 14px;box-shadow:0 2px 10px rgba(60,30,30,.07)}.turn{font-size:16px;font-weight:900}.notice{font-size:12px;color:var(--mut);min-height:16px}.move-counter{font-size:12px;color:var(--mut);white-space:nowrap}.turn-badge{display:none}
+.table{display:flex;flex-direction:column;gap:8px}.table>.board-wrap{order:1}.table>#blueLabel{order:0}.table>#redLabel{order:2}[data-me=blue] .table>#redLabel{order:0}[data-me=blue] .table>#blueLabel{order:2}
+.side-label{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:14px;border:2px solid transparent;box-shadow:0 2px 10px rgba(60,30,30,.07)}.side-label.active{border-color:var(--y);box-shadow:0 0 0 3px rgba(254,229,0,.5)}
+.avatar{width:38px;height:38px;flex:none;display:grid;place-items:center;font-size:20px;font-weight:900;background:#f7e4b0;border-radius:50%;border:2px solid var(--wood)}.side-label.red .avatar{color:var(--cho)}.side-label.blue .avatar{color:var(--han)}
+.info{display:flex;flex-direction:column;min-width:0;flex:1}.side-label .name{font-weight:900;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.side-label .captured{font-size:11px;color:var(--mut)}
+.clk{font-variant-numeric:tabular-nums;font-weight:900;font-size:16px;background:var(--br);color:#fff;border-radius:10px;padding:5px 10px;min-width:84px;text-align:center}.clk.low{background:var(--han)}.clk.byo{background:#b45309}
+.board-wrap{width:min(100%,max(300px,calc((100dvh - 330px)*.9)));margin:0 auto}.board{container-type:inline-size;position:relative;width:100%;aspect-ratio:9/10;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.35),transparent 40%),linear-gradient(135deg,#efc87f,#dfae5f);border-radius:10px;border:6px solid #a87c3a;box-shadow:0 8px 20px rgba(60,30,30,.25);user-select:none;touch-action:manipulation}
+.board-grid{position:absolute;inset:5.2% 4.6%;overflow:visible}.palace-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}.palace-lines line{stroke:var(--wood);stroke-width:1.3;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.cell{position:absolute;width:calc(100%/8);height:calc(100%/9);transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;z-index:2;filter:drop-shadow(0 2px 1.5px rgba(40,20,0,.3))}
+.cell.last-from::after,.cell.last-to::after{content:"";position:absolute;width:84%;aspect-ratio:1;border-radius:10px;border:2px dashed rgba(60,30,30,.45);pointer-events:none}.cell.last-to::after{border:3px solid #f59e0b}
+.cell.highlight::before,.cell.capture::before{content:"";position:absolute;width:30%;aspect-ratio:1;border-radius:50%;background:rgba(31,122,61,.6);z-index:4}.cell.capture::before{width:90%;background:rgba(201,48,44,.12);border:3px solid var(--han)}
+.piece{position:relative;isolation:isolate;z-index:3;width:78%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:4.6cqw;font-weight:900;line-height:1;background:var(--wood);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%);transition:transform .12s}
+.piece::before{content:"";position:absolute;inset:7%;z-index:-1;background:radial-gradient(circle at 35% 30%,#fffbe8,#f7e4b0 60%,#ebcf86);clip-path:inherit}.piece.red{color:var(--cho)}.piece.blue{color:var(--han)}.piece.general{width:94%;font-size:6cqw}.piece.sel{transform:scale(1.12)}.piece.sel::before{background:radial-gradient(circle at 35% 30%,#fff,#d9f7c8 60%,#9fe08a)}
+.actionbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.actionbar button{padding:11px 4px;font-size:13px}
+.modal{position:fixed;inset:0;background:rgba(60,30,30,.55);display:flex;align-items:flex-end;justify-content:center;z-index:100}.modal-card{width:100%;max-width:560px;max-height:88dvh;overflow:auto;background:#fff;border-radius:20px 20px 0 0;padding:18px}.modal-card h2{margin:0 0 10px;font-size:18px}.hidden{display:none!important}
+.log{max-height:200px;overflow:auto;background:#fffdf3;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;line-height:1.6}.move-row{display:grid;grid-template-columns:30px 1fr;gap:6px}.move-no{color:var(--mut);text-align:right}.log .system{color:#2563eb}.log .warn{color:#b45309}.log .bad{color:var(--han)}
+.capture-tray{display:flex;gap:10px;margin:8px 0}.captured-group{flex:1}.captured-title{font-size:11px;color:var(--mut);margin-bottom:3px}.captured-pieces{display:flex;gap:2px;flex-wrap:wrap;min-height:24px}.mini-piece{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#f7e4b0;border:1px solid var(--wood)}.mini-piece.red{color:var(--cho)}.mini-piece.blue{color:var(--han)}.empty-capture{font-size:11px;color:var(--mut)}
+.notice.alert{color:var(--han);font-weight:800}.cell.bik{filter:drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 2px #ef4444)}
+.rules{font-size:12px;line-height:1.7;color:#5b4636}
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
+/* ===== 장군 표시 ===== */
+.statusbar.in-check{background:#fff1f0;box-shadow:0 0 0 1.5px var(--han),0 2px 8px rgba(201,48,44,.2);animation:sbPulse 1.6s ease-in-out infinite}
+.statusbar.in-check .notice{font-size:14px;color:var(--han);font-weight:900}
+.check-chip{background:var(--han);color:#fff;font-weight:900;font-size:14px;padding:4px 10px;border-radius:99px;white-space:nowrap;animation:chipBlink 1.6s ease-in-out infinite}
+.board.in-check{border-color:#d93a35;animation:boardFlash 1.6s ease-in-out infinite}
+.side-label.incheck{border-color:var(--han);box-shadow:0 0 0 3px rgba(201,48,44,.35)}
+.cell.incheck{animation:kingGlow 1.6s ease-in-out infinite}
+.chk-ring{position:absolute;width:114%;aspect-ratio:1;border-radius:50%;border:3px solid #ef4444;z-index:6;pointer-events:none;animation:ringPulse 1s ease-in-out infinite}
+.chk-ring.atk{width:98%;border:3px dashed #f59e0b;animation:none}
+.check-banner{position:absolute;left:50%;top:3cqw;z-index:30;pointer-events:none;opacity:0;display:flex;align-items:baseline;gap:2cqw;white-space:nowrap;padding:1.6cqw 5cqw;border-radius:99px;background:rgba(201,48,44,.92);color:#fff;border:.4cqw solid rgba(255,255,255,.85);box-shadow:0 1cqw 3cqw rgba(0,0,0,.28);transform:translate(-50%,-1.5cqw)}
+.check-banner b{font-size:6cqw;line-height:1.1;letter-spacing:-.02em}
+.check-banner span{font-size:2.8cqw;font-weight:700;opacity:.95}
+.check-banner.opp{background:rgba(250,214,60,.95);color:var(--br);border-color:rgba(255,255,255,.85)}
+.check-banner.show{animation:chkFlash 1.8s ease both}
+@keyframes chkFlash{0%{opacity:0;transform:translate(-50%,-1.5cqw)}12%{opacity:1;transform:translate(-50%,0)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-.8cqw)}}
+@keyframes sbPulse{50%{background:#ffe3e0}}
+@keyframes chipBlink{50%{transform:scale(1.05);background:#e5463f}}
+@keyframes boardFlash{50%{box-shadow:0 8px 20px rgba(60,30,30,.2),0 0 0 4px rgba(217,58,53,.28)}}
+@keyframes kingGlow{0%,100%{filter:drop-shadow(0 0 2px #ef4444) drop-shadow(0 0 4px #ef4444)}50%{filter:drop-shadow(0 0 5px #ff2a2a) drop-shadow(0 0 9px #ff2a2a)}}
+@keyframes ringPulse{0%,100%{transform:scale(.95);opacity:1}50%{transform:scale(1.1);opacity:.55}}
+/* ===== 대국 결과 (화면 중앙) ===== */
+.result-overlay{position:fixed;inset:0;z-index:150;display:grid;place-items:center;padding:20px;background:rgba(60,30,30,.62);backdrop-filter:blur(2px)}
+.result-card{width:100%;max-width:340px;text-align:center;background:#fff9d6;border:4px solid var(--y);border-radius:26px;padding:26px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.4);animation:resPop .45s cubic-bezier(.2,1.3,.4,1)}
+.result-card.lose{background:#f1ede6;border-color:#b9ad98}
+.res-emblem{width:84px;height:84px;margin:0 auto 12px;display:grid;place-items:center;font-size:44px;font-weight:900;background:var(--wood);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.res-emblem span{display:grid;place-items:center;width:92%;height:92%;background:#f7e4b0;clip-path:inherit}
+.res-emblem.cho{color:var(--cho)}.res-emblem.han{color:var(--han)}.result-card.lose .res-emblem{filter:grayscale(.8)}
+.res-title{font-size:46px;font-weight:900;line-height:1.1;color:#8a5a00}.result-card.lose .res-title{color:#6b5f52}
+.res-sub{margin-top:8px;font-size:15px;font-weight:800;line-height:1.4}
+.res-rematch{margin-top:6px;font-size:12px;color:var(--mut);min-height:16px}
+.res-actions{display:grid;gap:8px;margin-top:14px}
+@keyframes resPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.statusbar.in-check,.check-chip,.board.in-check,.cell.incheck,.chk-ring,.result-card{animation:none!important}}
 
-        /* Dark Radar Leaflet Map Override */
-        #map {
-            width: 100vw;
-            height: 100vh;
-            background-color: #030712;
-            z-index: 0;
-        }
-
-        .leaflet-container {
-            background-color: #030712 !important;
-        }
-
-        .leaflet-control-attribution {
-            background: rgba(3, 7, 18, 0.8) !important;
-            color: #4b5563 !important;
-            font-size: 10px;
-        }
-
-        /* Radar Grid Overlay effect */
-        .radar-grid {
-            pointer-events: none;
-            position: absolute;
-            inset: 0;
-            z-index: 10;
-            background: radial-gradient(circle, transparent 20%, rgba(3, 7, 18, 0.4) 90%),
-                        linear-gradient(to right, rgba(0, 243, 255, 0.03) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 50px 50px, 50px 50px;
-        }
-
-        /* Custom Glassmorphism UI Panels */
-        .glass-panel {
-            background: rgba(10, 16, 31, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 243, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-
-        /* Radar Sweep Animation */
-        @keyframes sweep {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .radar-sweeper {
-            position: absolute;
-            width: 200vmax;
-            height: 200vmax;
-            top: 50%;
-            left: 50%;
-            margin-top: -100vmax;
-            margin-left: -100vmax;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, rgba(0, 255, 102, 0.08) 0deg, rgba(0, 255, 102, 0.01) 30deg, transparent 60deg);
-            pointer-events: none;
-            z-index: 5;
-            animation: sweep 12s linear infinite;
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(5, 8, 17, 0.6);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(0, 243, 255, 0.25);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 243, 255, 0.5);
-        }
-
-        /* Pulsing status dots */
-        .pulse-green {
-            box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7);
-            animation: pulse-green 2s infinite;
-        }
-        @keyframes pulse-green {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 255, 102, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
-        }
-
-
-        /* Mobile / touch support */
-        html, body, #map {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        button, input, select {
-            touch-action: manipulation;
-        }
-        .mobile-nav {
-            display: none;
-        }
-        .mobile-panel-toggle {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            body, html {
-                font-size: 14px;
-            }
-            .radar-sweeper {
-                animation-duration: 18s;
-            }
-            header {
-                top: 4px !important;
-                left: 4px !important;
-                right: 4px !important;
-                padding: 8px !important;
-                border-radius: 10px !important;
-                gap: 6px !important;
-            }
-            header h1 {
-                font-size: 12px !important;
-            }
-            header p {
-                font-size: 9px !important;
-                line-height: 1.25;
-            }
-            header .mt-1 {
-                margin-top: 3px !important;
-            }
-            header .mt-1 button {
-                min-height: 32px;
-            }
-            header > div:last-child {
-                display: none !important;
-            }
-            aside.fixed.top-20.left-3 {
-                top: 58px !important;
-                left: 4px !important;
-                right: 4px !important;
-                width: auto !important;
-                max-height: 43vh !important;
-                overflow-y: auto !important;
-                padding-bottom: 2px;
-                z-index: 45 !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            aside.fixed.top-20.right-3 {
-                top: 58px !important;
-                left: 4px !important;
-                right: 4px !important;
-                width: auto !important;
-                max-height: 55vh !important;
-                overflow-y: auto !important;
-                z-index: 46 !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            aside.fixed.top-20.left-3.mobile-panel-hidden,
-            aside.fixed.top-20.right-3.mobile-panel-hidden {
-                display: none !important;
-            }
-            #pilotControlPanel, #atcControlPanel,
-            aside.fixed.top-20.right-3 > div {
-                border-radius: 12px;
-            }
-            #pilotControlPanel, #atcControlPanel {
-                padding: 10px !important;
-            }
-            #playersList {
-                max-height: 22vh;
-            }
-            #atcRadioLog {
-                min-height: 110px !important;
-                max-height: 24vh;
-            }
-            #radioMessageInput {
-                min-height: 42px;
-                font-size: 13px !important;
-            }
-            #spawnPickerModal > div {
-                max-width: none !important;
-                width: calc(100vw - 12px) !important;
-                padding: 10px !important;
-            }
-            #spawnPickerMap {
-                height: 50vh !important;
-                min-height: 280px !important;
-            }
-            #setupModal > div {
-                max-height: calc(100vh - 16px);
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-                padding: 14px !important;
-            }
-            #gameOverOverlay > div,
-            #atcGuideModal > div {
-                width: calc(100vw - 20px) !important;
-                max-height: calc(100vh - 24px) !important;
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            #mobileNav {
-                display: flex;
-                position: fixed;
-                left: 6px;
-                right: 6px;
-                bottom: max(6px, env(safe-area-inset-bottom));
-                z-index: 55;
-                gap: 6px;
-                padding: 6px;
-                border-radius: 14px;
-                background: rgba(10,16,31,.92);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(0,243,255,.18);
-                box-shadow: 0 8px 28px rgba(0,0,0,.45);
-            }
-            #mobileNav button {
-                flex: 1;
-                min-height: 44px;
-                border-radius: 10px;
-                font-size: 12px;
-                font-weight: 700;
-            }
-            #mobileNav .active {
-                background: rgba(0, 243, 255, .18);
-                color: #8ff7ff;
-                border: 1px solid rgba(0, 243, 255, .35);
-            }
-            #map {
-                height: 100dvh !important;
-            }
-            .leaflet-control-zoom a {
-                width: 36px !important;
-                height: 36px !important;
-                line-height: 36px !important;
-            }
-            .leaflet-popup-content {
-                font-size: 12px;
-            }
-            .glass-panel button,
-            .glass-panel input,
-            .glass-panel select {
-                min-height: 40px;
-            }
-            .glass-panel .text-\[10px\] button,
-            .glass-panel button.text-\[10px\] {
-                min-height: 34px;
-            }
-        }
-
-
-        /* FIY C branding */
-        .fiyc-brand { letter-spacing: 0.12em; }
-
-        @media (max-width: 768px) {
-            html, body {
-                width: 100%;
-                height: 100%;
-                overflow: hidden !important;
-            }
-
-            #map {
-                position: fixed !important;
-                inset: 0 !important;
-                width: 100vw !important;
-                height: 100dvh !important;
-            }
-
-            header {
-                left: 4px !important;
-                right: 4px !important;
-                top: 4px !important;
-                min-height: 44px !important;
-                padding: 7px 9px !important;
-                z-index: 70 !important;
-            }
-
-            header h1 {
-                font-size: 13px !important;
-                white-space: nowrap;
-            }
-            header h1 .text-gray-500 {
-                display: none !important;
-            }
-            header p {
-                font-size: 8px !important;
-                max-width: 52vw;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            #mainControlAside, #commsAside {
-                top: 54px !important;
-                bottom: 62px !important;
-                left: 4px !important;
-                right: 4px !important;
-                width: auto !important;
-                max-height: 52dvh !important;
-                height: auto !important;
-                overflow: visible !important;
-                z-index: 60 !important;
-                pointer-events: none;
-            }
-
-            #mainControlAside > *, #commsAside > * {
-                pointer-events: auto;
-            }
-
-            #pilotControlPanel, #atcControlPanel {
-                width: 100% !important;
-                max-height: 52dvh !important;
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch;
-                padding: 10px !important;
-            }
-
-            #commsAside {
-                gap: 6px !important;
-            }
-            #commsAside > .glass-panel {
-                max-height: 58dvh !important;
-                overflow: hidden !important;
-            }
-            #commsAside #atcRadioLog {
-                max-height: 38dvh !important;
-                min-height: 120px !important;
-            }
-
-            #mobileNav {
-                left: 4px !important;
-                right: 4px !important;
-                bottom: max(4px, env(safe-area-inset-bottom)) !important;
-                padding: 4px !important;
-                z-index: 80 !important;
-            }
-            #mobileNav button {
-                min-height: 42px !important;
-                font-size: 11px !important;
-                padding: 0 4px !important;
-            }
-
-            #setupModal {
-                padding: 8px !important;
-                align-items: flex-start !important;
-                padding-top: max(8px, env(safe-area-inset-top)) !important;
-            }
-            #setupModal > div {
-                width: 100% !important;
-                max-width: none !important;
-                max-height: calc(100dvh - 16px) !important;
-                overflow-y: auto !important;
-                padding: 12px !important;
-                border-radius: 14px !important;
-            }
-
-            .glass-panel input, .glass-panel select, .glass-panel button {
-                min-height: 38px;
-            }
-
-            #atcCommandInput {
-                min-width: 0 !important;
-                font-size: 12px !important;
-            }
-
-            #helicopterSpeedRange {
-                height: 34px;
-            }
-        }
-
-        @media (max-width: 420px) {
-            header p { display: none !important; }
-            #mainControlAside { max-height: 54dvh !important; }
-            #commsAside { max-height: 60dvh !important; }
-            #pilotControlPanel, #atcControlPanel {
-                max-height: 54dvh !important;
-            }
-            #mobileNav button {
-                font-size: 10px !important;
-            }
-        }
-
-    </style>
+/* ===== 기보 읽기 · 소리 ===== */
+.kibo-wrap{width:min(100%,380px);margin:10px auto 6px}
+.kibo-info{font-size:13px;font-weight:800;text-align:center;line-height:1.5;min-height:40px;margin:8px 0 4px}
+.kibo-ctrl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kibo-ctrl button{padding:11px 4px;font-size:16px}
+.kibo-slider{width:100%;margin:10px 0 2px;accent-color:#b45309}
+.kibo-form{font-size:12px;font-weight:800;text-align:center;color:#5b4636;background:#fffdf3;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin:0 0 8px;line-height:1.6}.kibo-form:empty{display:none}
+.kibo-err{color:var(--han);font-size:13px;font-weight:700;line-height:1.5;margin:6px 0}
+.pill.snd{cursor:pointer;user-select:none}
+</style>
 </head>
-<body class="select-none overflow-hidden">
-    
-    <!-- Radar Sweep Background Visualizer -->
-    <div class="radar-sweeper"></div>
-    <div class="radar-grid"></div>
-
-    <!-- Leaflet Map Container -->
-    <div id="map"></div>
-
-    <!-- INITIAL CONNECTION MODAL -->
-    <div id="setupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-cyan-500/40 flex flex-col gap-4 shadow-2xl">
-            <div class="flex items-center gap-3 border-b border-gray-800 pb-3">
-                <div class="w-3.5 h-3.5 rounded-full bg-cyan-400 pulse-green"></div>
-                <div>
-                    <h2 class="text-base font-bold text-cyan-400 mono">멀티플레이어 관제/비행 접속</h2>
-                    <p class="text-xs text-gray-400">동일한 링크로 접속한 친구들과 함께 실시간 공유됩니다.</p>
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                <div>
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">내 호출부호 (Callsign / ID):</label>
-                    <input type="text" id="inputCallsign" value="KAL101" maxlength="8"
-                        class="w-full bg-gray-950 text-cyan-300 border border-cyan-500/40 rounded-lg px-3 py-2 text-sm font-mono uppercase tracking-wider focus:outline-none focus:border-cyan-400">
-                </div>
-
-                <div>
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">광역 접속 서버:</label>
-                    <select id="inputServer" class="w-full bg-gray-950 text-cyan-300 border border-cyan-500/40 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-cyan-400">
-                        <option value="GLOBAL">GLOBAL</option>
-                        <option value="GLOBAL-2">GLOBAL-2</option>
-                        <option value="GLOBAL-3">GLOBAL-3</option>
-                        <option value="AIR_FORCE_TRAINING">공군 훈련</option>
-                        <option value="ATC_TRAINING">관제 훈련</option>
-                        <option value="FLIGHT_TRAINING">비행 훈련</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">스폰 위치:</label>
-                    <button type="button" onclick="openSpawnPicker()" class="w-full py-2 bg-emerald-600/15 hover:bg-emerald-600/25 text-emerald-300 border border-emerald-500/35 rounded-lg text-xs font-bold transition">
-                        <i class="fa-solid fa-location-crosshairs mr-1"></i> 지도에서 스폰 위치 선택
-                    </button>
-                    <div id="spawnLocationText" class="mt-1 text-[10px] text-gray-500 font-mono">기본 위치: 37.4500, 126.4400</div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">관제 번호 (같은 번호끼리만 통신):</label>
-                    <input type="text" id="inputAtcChannel" value="120.5" maxlength="12"
-                        class="w-full bg-gray-950 text-amber-300 border border-amber-500/40 rounded-lg px-3 py-2 text-sm font-mono tracking-wider focus:outline-none focus:border-amber-400">
-                </div>
-
-                <div id="aircraftTypeBox">
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">기체:</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" id="typeBtnCivil" onclick="selectAircraftType('AIRLINER')" class="py-2 bg-cyan-600 text-white rounded-lg text-xs font-bold border border-cyan-400">✈️ 일반기</button>
-                        <button type="button" id="typeBtnFighter" onclick="selectAircraftType('FIGHTER')" class="py-2 bg-gray-900 text-gray-400 rounded-lg text-xs font-bold border border-gray-800">🛩️ 전투기</button>
-                        <button type="button" id="typeBtnHelicopter" onclick="selectAircraftType('HELICOPTER')" class="py-2 bg-gray-900 text-gray-400 rounded-lg text-xs font-bold border border-gray-800">🚁 전투헬기</button>
-                        <button type="button" id="typeBtnTerrorist" onclick="selectAircraftType('TERRORIST')" class="py-2 bg-gray-900 text-gray-400 rounded-lg text-xs font-bold border border-gray-800">☠️ 테러기체</button>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-medium text-gray-300 mb-1 block">접속 모드 (Role):</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="button" id="roleBtnPilot" onclick="selectRole('PILOT')" 
-                            class="py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-cyan-600 text-white shadow-lg border border-cyan-400">
-                            <i class="fa-solid fa-plane"></i> 조종사 (Pilot)
-                        </button>
-                        <button type="button" id="roleBtnATC" onclick="selectRole('ATC')" 
-                            class="py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-gray-900 text-gray-400 border border-gray-800 hover:text-white">
-                            <i class="fa-solid fa-headset"></i> 관제사 (ATC)
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="startMultiplayerSession()" class="mt-2 w-full py-3 bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-satellite-dish"></i> 멀티플레이어 공역 접속 시작
-            </button>
-        </div>
+<body>
+<header class="appbar"><div class="brand"><span class="logo">將</span>장기 마루<small>P2P</small></div><div class="status"><span class="pill snd" id="soundPill" role="button" aria-label="소리 켜기/끄기">🔊</span><span class="pill"><span id="connDot" class="dot"></span><span id="connText">연결 안 됨</span></span><span class="pill" id="sidePill">진영: -</span><span class="pill" id="rolePill">역할: -</span></div></header>
+<div class="wrap">
+<main id="lobbyView" class="lobby">
+  <div class="hero"><div class="big"><span>楚</span></div><h1>친구와 한 판 둘까요?</h1></div>
+  <section class="card"><h3>👤 대국 설정</h3>
+    <label class="field">내 이름 (상대에게 표시)<input id="nameInput" class="input" maxlength="12" placeholder="이름 입력"></label>
+    <label class="field">내 차림새<select id="formationSel" class="input">
+      <option value="wonang">원앙마</option>
+      <option value="yanggwima">양귀마</option>
+      <option value="leftWonang">좌원앙마</option>
+      <option value="rightWonang">우원앙마</option>
+    </select></label>
+    <div class="row" style="align-items:flex-end"><label class="field" style="margin:0;flex:1">기본 시간<select id="timeSel" class="input"><option value="0">없음</option><option value="1">1분</option><option value="3">3분</option><option value="5">5분</option><option value="10" selected>10분</option><option value="20">20분</option><option value="30">30분</option></select></label>
+    <label class="field" style="margin:0;flex:1">초읽기 (3회)<select id="byoSel" class="input"><option value="0">없음</option><option value="10">10초</option><option value="20">20초</option><option value="30" selected>30초</option><option value="60">60초</option></select></label></div>
+  </section>
+  <section class="card"><h3>🧑 혼자 두기</h3>
+    <div class="row">
+      <label class="field" style="margin:0;flex:1">초 차림새<select id="soloRedFormation" class="input">
+        <option value="wonang">원앙마</option><option value="yanggwima">양귀마</option><option value="leftWonang">좌원앙마</option><option value="rightWonang">우원앙마</option>
+      </select></label>
+      <label class="field" style="margin:0;flex:1">한 차림새<select id="soloBlueFormation" class="input">
+        <option value="wonang">원앙마</option><option value="yanggwima">양귀마</option><option value="leftWonang">좌원앙마</option><option value="rightWonang">우원앙마</option>
+      </select></label>
     </div>
-
-    <!-- SPAWN LOCATION PICKER -->
-    <div id="spawnPickerModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-4xl rounded-2xl p-4 border border-emerald-500/40 shadow-2xl">
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <h2 class="text-base font-bold text-emerald-300 mono">스폰 위치 선택</h2>
-                    <p class="text-xs text-gray-400">지도에서 원하는 위치를 클릭하세요.</p>
-                </div>
-                <button onclick="closeSpawnPicker()" class="text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="spawnPickerMap" class="w-full h-[55vh] min-h-[360px] rounded-xl border border-gray-800 overflow-hidden"></div>
-            <div class="mt-3 flex items-center justify-between gap-3">
-                <div id="spawnPickerCoords" class="text-xs text-cyan-300 font-mono">37.4500, 126.4400</div>
-                <button onclick="confirmSpawnPicker()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl">선택 완료</button>
-            </div>
-        </div>
+    <button id="soloBtn" class="secondary" style="width:100%;margin-top:8px">혼자 두기 (초·한 번갈아 두기)</button>
+  </section>
+  <section class="card"><h3>🔌 상대와 연결</h3>
+    <div class="stack">
+      <button id="createBtn" class="primary">방 만들기</button>
+      <button id="joinBtn" class="secondary">방 참가하기</button>
+      <div id="signalArea" class="hidden">
+        <div class="divider"></div>
+        <div id="signalStep" class="muted" style="margin-bottom:8px"></div>
+        <textarea id="signalInput" class="codebox" placeholder="상대에게 받은 연결 코드를 붙여 넣으세요."></textarea>
+        <div class="row" style="margin:8px 0"><button id="signalApplyBtn" class="primary" style="flex:1">코드 적용</button><button id="copySignalBtn" class="small" disabled>내 코드 복사</button></div>
+        <textarea id="signalOutput" class="codebox" placeholder="여기에 내 연결 코드가 나타납니다." readonly></textarea>
+      </div>
     </div>
-
-    <!-- GAME OVER OVERLAY -->
-    <div id="gameOverOverlay" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/85 backdrop-blur-md p-4">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-7 border border-red-500/50 text-center shadow-2xl">
-            <div class="text-5xl mb-3">💥</div>
-            <h2 class="text-2xl font-black text-red-400 mono">GAME OVER</h2>
-            <p id="gameOverReason" class="mt-2 text-sm text-gray-300">피격으로 비행이 종료되었습니다.</p>
-            <button onclick="location.reload()" class="mt-5 w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl">새 게임 시작</button>
-        </div>
-    </div>
-
-    <!-- TOP HEADER / NAVBAR -->
-    <header class="fixed top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl glass-panel border border-cyan-500/20">
-        <!-- Title & Status -->
-        <div class="flex items-center gap-3">
-            <div id="connStatusDot" class="w-3 h-3 rounded-full bg-emerald-400 pulse-green"></div>
-            <div>
-                <h1 class="text-base font-bold tracking-wider text-cyan-400 mono flex items-center gap-2">
-                    <span class="fiyc-brand">FIY C</span>
-                    <span class="text-gray-500 text-[10px]">FLY IF YOU CAN</span>
-                </h1>
-                <p class="text-xs text-gray-400">서버: <span id="serverDisplay" class="text-cyan-300 font-semibold">GLOBAL</span> • 관제: <span id="channelDisplay" class="text-amber-300 font-semibold">120.5</span> • 접속자: <span id="myCallsignDisplay" class="text-cyan-300 font-semibold">---</span> (<span id="myRoleDisplay" class="text-emerald-400 font-semibold">PILOT</span>) • 온라인 플레이어: <span id="onlineCount" class="text-cyan-300 font-semibold mono">1</span>명</p>
-                <div class="mt-1 flex items-center gap-2">
-                    <button onclick="changeAtcChannel()" class="px-2 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded text-[10px] font-bold transition">
-                        <i class="fa-solid fa-radio mr-1"></i>통신 ID 변경
-                    </button>
-                    <span class="text-[10px] text-gray-500">같은 서버 + 같은 통신 ID의 파일럿/관제사끼리 연결</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Time Warp (Max 100x) & Guide -->
-        <div class="flex items-center gap-4">
-            <!-- ATC Phraseology Guide Button -->
-            <button onclick="toggleModal('atcGuideModal')" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
-                <i class="fa-solid fa-book-bookmark"></i> 📖 관제 명령어 가이드
-            </button>
-        </div>
-    </header>
-
-    <!-- LEFT PANEL: PILOT HUD / ATC CONTROL PANEL -->
-    <aside id="mainControlAside" class="fixed top-20 left-3 z-20 w-80 max-h-[calc(100vh-6rem)] flex flex-col gap-3">
-        
-        <!-- PILOT MODE HUD -->
-        <div id="pilotControlPanel" class="glass-panel rounded-xl p-4 flex flex-col gap-3">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-2">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-plane-departure text-cyan-400"></i>
-                    <span id="pilotTitleCallsign" class="font-bold text-sm text-cyan-200 mono">MY AIRCRAFT</span>
-                </div>
-                <span id="userStatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">LIVE SYNC</span>
-            </div>
-
-            <div id="combatStatusBanner" class="hidden text-xs rounded-lg border p-2 bg-red-950/70 border-red-500/40 text-red-200"></div>
-
-            <!-- Telemetry Display -->
-            <div class="grid grid-cols-3 gap-2 text-center">
-                <div class="bg-gray-950/60 p-2 rounded-lg border border-gray-800">
-                    <div class="text-[10px] text-gray-400">ALTITUDE</div>
-                    <div id="userAltVal" class="text-sm font-bold text-cyan-300 mono">12,000 FT</div>
-                </div>
-                <div class="bg-gray-950/60 p-2 rounded-lg border border-gray-800">
-                    <div class="text-[10px] text-gray-400">HEADING</div>
-                    <div id="userHdgVal" class="text-sm font-bold text-cyan-300 mono">090°</div>
-                </div>
-                <div class="bg-gray-950/60 p-2 rounded-lg border border-gray-800">
-                    <div class="text-[10px] text-gray-400">SPEED</div>
-                    <div id="userSpdVal" class="text-sm font-bold text-cyan-300 mono">630 KT</div>
-                </div>
-            </div>
-
-            <!-- Pilot Altitude Control -->
-            <div class="bg-gray-950/50 p-2.5 rounded-lg border border-cyan-500/20">
-                <div class="flex justify-between items-center mb-1.5">
-                    <span class="text-[11px] text-gray-400">고도 설정</span>
-                    <span id="pilotTargetAltVal" class="text-[11px] text-cyan-300 font-mono">목표 12,000 FT</span>
-                </div>
-                <div class="flex gap-1.5">
-                    <button onclick="adjustPilotAltitude(-1000)" class="px-2 bg-gray-800 hover:bg-gray-700 text-xs rounded border border-gray-700 text-gray-200">-1k</button>
-                    <input type="number" id="pilotAltInput" step="500" min="0" max="60000" placeholder="FT" class="flex-1 bg-gray-900 border border-gray-700 rounded text-center text-xs text-white font-mono py-1">
-                    <button onclick="adjustPilotAltitude(1000)" class="px-2 bg-gray-800 hover:bg-gray-700 text-xs rounded border border-gray-700 text-gray-200">+1k</button>
-                    <button onclick="setPilotAltitude()" class="bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 rounded text-xs font-semibold px-3 py-1">설정</button>
-                </div>
-            </div>
-
-            <!-- Helicopter-only Speed Control -->
-            <div id="helicopterSpeedControl" class="hidden bg-gray-950/50 p-2.5 rounded-lg border border-amber-500/25">
-                <div class="flex justify-between items-center mb-1.5">
-                    <span class="text-[11px] text-gray-400">헬기 속도 조절</span>
-                    <span id="helicopterSpeedVal" class="text-[11px] text-amber-300 font-mono">220 KT</span>
-                </div>
-                <input id="helicopterSpeedRange" type="range" min="0" max="22000" step="500" value="22000"
-                    oninput="setHelicopterSpeed(this.value)"
-                    class="w-full accent-amber-500">
-                <div class="flex justify-between text-[9px] text-gray-500 font-mono mt-1">
-                    <span>0 KT · 호버링</span>
-                    <span>220 KT</span>
-                </div>
-            </div>
-
-            <!-- Navigation Helper Info -->
-            <div class="text-xs text-gray-400 bg-gray-900/50 p-2.5 rounded-lg border border-gray-800 space-y-1">
-                <div class="flex justify-between">
-                    <span>다음 항로 웨이포인트:</span>
-                    <span id="userNextWpt" class="text-cyan-400 font-mono font-semibold">DIRECT HEADING</span>
-                </div>
-                <p class="text-[11px] text-gray-400 italic">💡 지도를 클릭하면 해당 위치로 무한 직진 항로 웨이포인트가 추가됩니다.</p>
-            </div>
-
-            <!-- Waypoint Actions -->
-            <div id="flightActionPanel" class="grid grid-cols-2 gap-2">
-                <button id="btnLanding" onclick="toggleLanding()" class="py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 text-xs rounded-lg border border-emerald-500/40 font-semibold">
-                    <i class="fa-solid fa-plane-arrival mr-1"></i> 착륙 / 정지
-                </button>
-                <button id="btnAttack" onclick="attackTarget()" class="py-2 bg-red-600/20 hover:bg-red-600/30 text-red-300 text-xs rounded-lg border border-red-500/40 font-semibold hidden">
-                    <i class="fa-solid fa-crosshairs mr-1"></i> 전투기 공격
-                </button>
-            </div>
-
-            <div id="combatTargetInfo" class="text-[11px] text-gray-500 bg-gray-950/50 rounded-lg border border-gray-800 p-2 hidden">공격 대상: <span id="combatTargetName" class="text-red-300 font-mono">미선택</span>
-            </div>
-
-            <div class="flex gap-2">
-                <button onclick="clearUserWaypoints()" class="flex-1 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-lg transition font-medium border border-gray-700">
-                    <i class="fa-solid fa-trash-can mr-1"></i> 웨이포인트 초기화
-                </button>
-                <button id="btnEmergencyTrigger" onclick="toggleUserEmergency()" class="py-1.5 px-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs rounded-lg transition font-medium border border-red-500/40 flex items-center gap-1">
-                    <i class="fa-solid fa-triangle-exclamation"></i> SQUAWK 7700
-                </button>
-            </div>
-        </div>
-
-        <!-- CONTROLLER MODE ATC TRACKING & COMMAND PANEL -->
-        <div id="atcControlPanel" class="glass-panel rounded-xl p-4 flex flex-col gap-3 hidden">
-            <div class="flex items-center justify-between border-b border-gray-800 pb-2">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-headset text-amber-400"></i>
-                    <span class="font-bold text-sm text-amber-200 mono">ATC RADAR CONTROL</span>
-                </div>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono">CONTROLLER</span>
-            </div>
-
-            <!-- Aircraft Search & Select Input -->
-            <div class="relative">
-                <label class="text-[11px] text-gray-400 font-medium mb-1 block">현재 통신 ID에 연결된 조종사 검색/추적:</label>
-                <div class="flex gap-2">
-                    <div class="relative flex-1">
-                        <input type="text" id="atcSearchInput" placeholder="예: KAL101, AAR202..." autocomplete="off"
-                            oninput="onCallsignSearchInput(this.value)"
-                            class="w-full bg-gray-950 text-cyan-300 border border-cyan-500/30 rounded-lg px-3 py-2 text-xs font-mono uppercase tracking-wider focus:outline-none focus:border-cyan-400">
-                        <i class="fa-solid fa-magnifying-glass absolute right-2.5 top-2.5 text-gray-500 text-xs"></i>
-                    </div>
-                    <button onclick="clearTrackedAircraft()" class="px-2 py-1 bg-gray-800 hover:bg-gray-700 text-xs text-gray-400 rounded-lg border border-gray-700" title="추적 해제">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <!-- Search Suggestions Dropdown -->
-                <div id="atcSearchSuggestions" class="absolute left-0 right-0 top-full mt-1 bg-gray-950/95 border border-cyan-500/30 rounded-lg max-h-36 overflow-y-auto hidden z-50"></div>
-            </div>
-
-            <!-- Tracked Aircraft Display Card -->
-            <div id="trackedAircraftCard" class="bg-gray-950/80 p-3 rounded-xl border border-cyan-500/20 space-y-2">
-                <div class="flex justify-between items-center">
-                    <span id="trackedCallsign" class="font-mono font-bold text-lg text-cyan-400">대상 항공기 미선택</span>
-                    <span id="trackedSquawk" class="text-xs font-mono text-gray-400">SQK: ----</span>
-                </div>
-                <div id="trackedDetailInfo" class="text-xs text-gray-400 space-y-1">
-                    <p>콜사인을 입력하여 관제 명령을 직접 입력하십시오.</p>
-                </div>
-            </div>
-
-            <!-- Direct ATC Text Command Interface -->
-            <div id="atcCommandSection" class="space-y-3">
-                <span class="text-[11px] font-bold text-amber-400 tracking-wider block border-b border-gray-800 pb-1">⌨️ 직접 관제 명령</span>
-                <p class="text-[10px] text-gray-500 leading-relaxed">콜사인과 명령을 직접 입력하세요. 같은 통신 ID의 파일럿에게만 명령이 전달됩니다.</p>
-
-                <div class="flex gap-2">
-                    <input id="atcCommandInput" type="text" maxlength="200" autocomplete="off"
-                        placeholder="예: KAL101 고도 20000"
-                        onkeydown="if(event.key==='Enter'){event.preventDefault();executeAtcTextCommand();}"
-                        class="flex-1 min-w-0 bg-gray-950 text-amber-200 border border-amber-500/30 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400">
-                    <button onclick="executeAtcTextCommand()" class="px-3 bg-amber-600/25 hover:bg-amber-600/45 text-amber-100 border border-amber-500/40 rounded-lg text-xs font-bold whitespace-nowrap">명령 전송</button>
-                </div>
-
-                <div class="bg-gray-950/70 p-3 rounded-lg border border-gray-800 space-y-1.5">
-                    <div class="text-[10px] font-bold text-gray-300">한국어 명령 예시</div>
-                    <div class="text-[10px] text-gray-500 font-mono leading-relaxed">
-                        KAL101 고도 20000<br>
-                        KAL101 기수 180<br>
-                        KAL101 대기<br>
-                        KAL101 대기 해제<br>
-                        KAL101 직항 37.50, 126.44<br>
-                        KAL101 비상 승인 / KAL101 비상 해제
-                    </div>
-                </div>
-
-                <div id="atcCommandStatus" class="text-[10px] text-gray-500 min-h-[16px]"></div>
-            </div>
-        </div>
-    </aside>
-
-    <!-- RIGHT PANEL: ONLINE PLAYERS LIST & SILENT RADIO LOG -->
-    <aside id="commsAside" class="fixed top-20 right-3 z-20 w-80 max-h-[calc(100vh-6rem)] flex flex-col gap-3 mobile-panel-hidden">
-        
-        <!-- Online Players List -->
-        <div class="glass-panel rounded-xl p-3 flex flex-col max-h-60">
-            <div class="flex justify-between items-center pb-2 border-b border-gray-800 mb-2">
-                <span class="text-xs font-bold text-gray-300 flex items-center gap-1.5">
-                    <i class="fa-solid fa-users text-cyan-400"></i> 공역 접속 플레이어 (<span id="playerCount">1</span>)
-                </span>
-                <span class="text-[10px] text-gray-500">클릭 시 추적</span>
-            </div>
-            <div id="playersList" class="overflow-y-auto space-y-1 pr-1 text-xs font-mono">
-                <!-- Dynamically populated online players -->
-            </div>
-        </div>
-
-        <!-- Silent ATC Radio Communications Log -->
-        <div class="glass-panel rounded-xl p-3 flex flex-col flex-1 min-h-[220px]">
-            <div class="flex justify-between items-center pb-2 border-b border-gray-800 mb-2">
-                <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
-                    <i class="fa-solid fa-walkie-talkie"></i> ATC 통신망 (양방향)
-                </span>
-                <span class="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                    <i class="fa-solid fa-cloud mr-1"></i>Cloud Live
-                </span>
-            </div>
-            <div id="atcRadioLog" class="flex-1 overflow-y-auto space-y-1.5 text-xs font-mono text-gray-300 p-1 bg-gray-950/50 rounded-lg border border-gray-900/80"></div>
-            <div class="mt-2 flex gap-2">
-                <input id="radioMessageInput" type="text" maxlength="200" placeholder="파일럿 ↔ 관제사 메시지 입력..."
-                    onkeydown="if(event.key==='Enter') sendRadioMessage()"
-                    class="flex-1 bg-gray-950 text-cyan-200 border border-cyan-500/30 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-400">
-                <button onclick="sendRadioMessage()" class="px-3 py-2 bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 border border-cyan-500/40 rounded-lg text-xs font-bold">전송</button>
-            </div>
-            <div class="text-[10px] text-gray-500 mt-1">같은 서버 + 같은 통신 ID의 파일럿/관제사가 양방향으로 대화합니다.</div>
-        </div>
-    </aside>
-
-
-
-    <!-- MOBILE NAV -->
-    <div id="mobileNav" class="mobile-nav" aria-label="모바일 메뉴">
-        <button id="mobilePanelBtn" class="active" onclick="toggleMobilePanel('main')">✈️ 내 화면</button>
-        <button id="mobileCommsBtn" onclick="toggleMobilePanel('comms')">📻 통신/플레이어</button>
-        <button onclick="toggleModal('atcGuideModal')">📖 가이드</button>
-    </div>
-
-    <!-- KOREAN ATC PHRASEOLOGY GUIDE MODAL -->
-    <div id="atcGuideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-amber-500/30 flex flex-col max-h-[85vh]">
-            <div class="flex justify-between items-center pb-3 border-b border-gray-800">
-                <h2 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-book-open-reader"></i> 📖 한국어 관제 명령어 가이드
-                </h2>
-                <button onclick="toggleModal('atcGuideModal')" class="text-gray-400 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto my-4 space-y-4 pr-2 text-xs leading-relaxed text-gray-300">
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-amber-500/20 space-y-1.5">
-                    <div class="text-amber-300 font-bold text-sm">1. 고도 변경</div>
-                    <p class="font-mono text-cyan-300">KAL101 고도 28000</p>
-                    <p class="text-gray-400">지정한 고도로 즉시 변경합니다.</p>
-                </div>
-
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-amber-500/20 space-y-1.5">
-                    <div class="text-amber-300 font-bold text-sm">2. 기수 변경</div>
-                    <p class="font-mono text-cyan-300">KAL101 기수 180</p>
-                    <p class="text-gray-400">기수를 지정한 방위각으로 변경합니다.</p>
-                </div>
-
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-amber-500/20 space-y-1.5">
-                    <div class="text-amber-300 font-bold text-sm">3. 대기 선회</div>
-                    <p class="font-mono text-cyan-300">KAL101 대기</p>
-                    <p class="text-gray-400">현재 위치에서 대기 선회를 시작합니다.</p>
-                </div>
-
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-amber-500/20 space-y-1.5">
-                    <div class="text-amber-300 font-bold text-sm">4. 대기 해제</div>
-                    <p class="font-mono text-cyan-300">KAL101 대기 해제</p>
-                </div>
-
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-amber-500/20 space-y-1.5">
-                    <div class="text-amber-300 font-bold text-sm">5. 직항</div>
-                    <p class="font-mono text-cyan-300">KAL101 직항 37.50, 126.44</p>
-                    <p class="text-gray-400">입력한 좌표에 직항 웨이포인트를 지정합니다.</p>
-                </div>
-
-                <div class="bg-gray-950/80 p-3.5 rounded-xl border border-red-500/20 space-y-1.5">
-                    <div class="text-red-300 font-bold text-sm">6. 비상 상태</div>
-                    <p class="font-mono text-red-300">KAL101 비상 승인</p>
-                    <p class="font-mono text-red-300">KAL101 비상 해제</p>
-                </div>
-            </div>
-
-            <div class="pt-3 border-t border-gray-800 text-right">
-                <button onclick="toggleModal('atcGuideModal')" class="px-5 py-2 bg-amber-500 text-gray-950 font-bold text-xs rounded-xl hover:bg-amber-400 transition">
-                    확인 및 닫기
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FIREBASE & MULTIPLAYER LOGIC -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Firebase Config & Globals ---
-        // 실제 Firebase 프로젝트: fly-if-you-can
-        const appId = 'fly-if-you-can';
-        const firebaseConfig = {
-            apiKey: 'AIzaSyCX5Do39BQn6_i6ZBnjOo8iyg_3HWlCvP0',
-            authDomain: 'fly-if-you-can.firebaseapp.com',
-            projectId: 'fly-if-you-can',
-            storageBucket: 'fly-if-you-can.firebasestorage.app',
-            messagingSenderId: '704442161413',
-            appId: '1:704442161413:web:30cfadfca8daf9c92cff6c',
-            measurementId: 'G-L47JZ2DKB4'
-        };
-        
-        let app, db, auth;
-        let firebaseReady = false;
-        let firebaseInitError = null;
-        let firebaseInitPromise = null;
-        let myUserId = 'user_' + Math.random().toString(36).substring(2, 9);
-        let myCallsign = 'KAL101';
-        let myRole = 'PILOT'; // 'PILOT' or 'ATC'
-        let myAircraftType = 'AIRLINER'; // 'AIRLINER' or 'FIGHTER'
-        let serverId = 'GLOBAL';
-        let atcChannel = '120.5';
-        let helicopterTargetSpeed = 22000;
-        let combatTargetUserId = null;
-        let radioUnsubscribe = null;
-
-        // 비밀번호/암호 체계는 제거되었습니다.
-        let playersUnsubscribe = null;
-        const PRESENCE_TIMEOUT_MS = 60000;
-
-        // Local Simulation State for My Aircraft (if Pilot)
-        const AIRCRAFT_SPEEDS = {
-            AIRLINER: 45000,
-            FIGHTER: 63000,
-            HELICOPTER: 22000,
-            TERRORIST: 52000
-        };
-        const COMBAT_TYPES = new Set(['FIGHTER', 'HELICOPTER', 'TERRORIST']);
-        const ATTACK_RANGES_NM = {
-            FIGHTER: 80,
-            HELICOPTER: 35,
-            TERRORIST: 70
-        };
-        const DEFAULT_SPAWN_LAT = 37.45;
-        const DEFAULT_SPAWN_LNG = 126.44;
-        let selectedSpawnLat = DEFAULT_SPAWN_LAT;
-        let selectedSpawnLng = DEFAULT_SPAWN_LNG;
-        let spawnPickerMap = null;
-        let spawnPickerMarker = null;
-
-        function getCruiseSpeedForAircraft(type = myAircraftType) {
-            return AIRCRAFT_SPEEDS[type] || AIRCRAFT_SPEEDS.AIRLINER;
-        }
-
-        // 표시 전용 속도: 실제 물리 속도값은 그대로 유지하고 HUD/레이더에는 1/100로 표시합니다.
-        function formatDisplaySpeed(speed) {
-            const value = Number(speed);
-            if (!Number.isFinite(value)) return '0';
-            return Math.round(value / 100).toLocaleString();
-        }
-
-        function isCombatAircraftType(type) {
-            return COMBAT_TYPES.has(type);
-        }
-
-        // 관제 연결은 '서버 + 통신 ID'를 기준으로 합니다.
-        // 같은 통신 ID의 파일럿만 ATC가 추적/명령할 수 있습니다.
-        function normalizeAtcChannel(value) {
-            return String(value ?? '').trim().toUpperCase();
-        }
-
-        function isSameAtcChannel(player) {
-            return normalizeAtcChannel(player?.atcChannel) === normalizeAtcChannel(atcChannel);
-        }
-
-        function canAtcControlPlayer(player) {
-            return myRole === 'ATC' && player?.role === 'PILOT' && isSameAtcChannel(player);
-        }
-
-        let myAircraft = {
-            id: myCallsign,
-            lat: DEFAULT_SPAWN_LAT,
-            lng: DEFAULT_SPAWN_LNG,
-            alt: 12000,
-            targetAlt: 12000,
-            speed: AIRCRAFT_SPEEDS.AIRLINER,
-            targetSpeed: AIRCRAFT_SPEEDS.AIRLINER,
-            heading: 90,
-            targetHeading: 90,
-            squawk: "7000",
-            role: "PILOT",
-            aircraftType: "AIRLINER",
-            atcChannel: "120.5",
-            isLanded: false,
-            isDisabled: false,
-            waypoints: [], // Array of {lat, lng, name}
-            isHolding: false,
-            isEmergency: false,
-            requiresEmergencyLanding: false,
-            emergencyLanded: false,
-            gameOver: false,
-            lastHitBy: null,
-            lastHitAt: 0,
-            lastUpdated: Date.now()
-        };
-
-        // All connected remote players map: userId -> playerObject
-        const remotePlayers = new Map();
-
-        // Map and markers
-        let map = null;
-        let waypointPolylineGroup = null;
-        const playerMarkers = new Map(); // userId -> { marker, trailPolyline, emergencyCircle }
-        
-        let lastTimestamp = performance.now();
-        // 물리/Firestore 동기화 주기용 타이머입니다.
-        // 이 변수가 선언되어 있지 않으면 requestAnimationFrame 루프가
-        // 첫 프레임 이후 ReferenceError로 중단되어 기체가 움직이지 않습니다.
-        let lastGameSync = 0;
-
-        // Firestore 쓰기가 겹치면 오래 전에 시작된 12000 FT 저장이
-        // 새 고도보다 늦게 반영되어 현재 고도를 다시 덮어쓸 수 있습니다.
-        // 모든 상태 저장을 순서대로 처리해 이런 역전 현상을 막습니다.
-        let stateWriteChain = Promise.resolve();
-        let trackedUserId = null;
-        let waypointSeq = 1;
-        const MARKER_RENDER_INTERVAL_MS = 33;
-        const TELEMETRY_UPDATE_INTERVAL_MS = 200;
-        let lastMarkerRenderAt = 0;
-        let lastTelemetryUpdateAt = 0;
-        let lastCombatStatusKey = '';
-        let lastAtcPanAt = 0;
-        let heartbeatTimer = null;
-        const FIRESTORE_STATE_SYNC_INTERVAL_MS = 2000;
-
-        window.selectRole = function(role) {
-            myRole = role;
-            const btnPilot = document.getElementById('roleBtnPilot');
-            const btnATC = document.getElementById('roleBtnATC');
-            if (role === 'PILOT') {
-                btnPilot.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-cyan-600 text-white shadow-lg border border-cyan-400";
-                btnATC.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-gray-900 text-gray-400 border border-gray-800 hover:text-white";
-            } else {
-                btnATC.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-amber-600 text-white shadow-lg border border-amber-400";
-                btnPilot.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-2 bg-gray-900 text-gray-400 border border-gray-800 hover:text-white";
-            }
-        };
-
-        window.selectAircraftType = function(type) {
-            if (!AIRCRAFT_SPEEDS[type]) type = 'AIRLINER';
-            myAircraftType = type;
-            myAircraft.aircraftType = type;
-            if (myRole === 'PILOT' && !myAircraft.isLanded && !myAircraft.gameOver) {
-                const nextSpeed = type === 'HELICOPTER' ? helicopterTargetSpeed : getCruiseSpeedForAircraft(type);
-                myAircraft.speed = nextSpeed;
-                myAircraft.targetSpeed = nextSpeed;
-            }
-            syncHelicopterSpeedControl();
-
-            const ids = ['typeBtnCivil', 'typeBtnFighter', 'typeBtnHelicopter', 'typeBtnTerrorist'];
-            const labels = {
-                AIRLINER: 'typeBtnCivil',
-                FIGHTER: 'typeBtnFighter',
-                HELICOPTER: 'typeBtnHelicopter',
-                TERRORIST: 'typeBtnTerrorist'
-            };
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const active = id === labels[type];
-                el.className = active
-                    ? (type === 'TERRORIST' ? 'py-2 bg-red-700 text-white rounded-lg text-xs font-bold border border-red-400' : type === 'HELICOPTER' ? 'py-2 bg-amber-600 text-white rounded-lg text-xs font-bold border border-amber-400' : type === 'FIGHTER' ? 'py-2 bg-red-600 text-white rounded-lg text-xs font-bold border border-red-400' : 'py-2 bg-cyan-600 text-white rounded-lg text-xs font-bold border border-cyan-400')
-                    : 'py-2 bg-gray-900 text-gray-400 rounded-lg text-xs font-bold border border-gray-800';
-            });
-        };
-
-        function syncHelicopterSpeedControl() {
-            const panel = document.getElementById('helicopterSpeedControl');
-            const range = document.getElementById('helicopterSpeedRange');
-            const label = document.getElementById('helicopterSpeedVal');
-            const isHelicopter = myRole === 'PILOT' && myAircraftType === 'HELICOPTER';
-            panel?.classList.toggle('hidden', !isHelicopter);
-            if (isHelicopter) {
-                const value = Math.max(0, Math.min(22000, Number(helicopterTargetSpeed) || 0));
-                if (range) range.value = String(value);
-                if (label) label.innerText = `${formatDisplaySpeed(value)} KT${value === 0 ? ' · 호버링' : ''}`;
-            }
-        }
-
-        window.setHelicopterSpeed = function(value) {
-            if (myRole !== 'PILOT' || myAircraftType !== 'HELICOPTER') return;
-            const next = Math.max(0, Math.min(22000, Math.round(Number(value) / 500) * 500));
-            helicopterTargetSpeed = next;
-            if (!myAircraft.isLanded && !myAircraft.gameOver && !myAircraft.isDisabled) {
-                myAircraft.targetSpeed = next;
-                myAircraft.speed = next;
-            }
-            const label = document.getElementById('helicopterSpeedVal');
-            if (label) label.innerText = `${formatDisplaySpeed(next)} KT${next === 0 ? ' · 호버링' : ''}`;
-            const hud = document.getElementById('userSpdVal');
-            if (hud) hud.innerText = `${formatDisplaySpeed(myAircraft.speed)} KT`;
-            renderAllPlayers(performance.now());
-            pushMyStateToFirestore();
-        };
-
-        window.startMultiplayerSession = async function() {
-            try {
-                await initFirebaseCore();
-            } catch (err) {
-                const code = err?.code ? `\n오류 코드: ${err.code}` : '';
-                const origin = `\n\n현재 주소: ${location.href}\n프로토콜: ${location.protocol}`;
-                alert(`Firebase 인증에 실패했습니다.${code}\n\n${err?.message || err}${origin}`);
-                console.error('Firebase core startup error:', err);
-                return;
-            }
-
-            const selectedServer = (document.getElementById('inputServer').value || 'GLOBAL').trim().toUpperCase();
-
-            const csInput = document.getElementById('inputCallsign').value.trim().toUpperCase();
-            if (csInput) myCallsign = csInput;
-            serverId = selectedServer;
-            atcChannel = normalizeAtcChannel(document.getElementById('inputAtcChannel').value || '120.5');
-
-            // 선택한 스폰 위치를 사용합니다.
-            myAircraft.lat = Number.isFinite(Number(selectedSpawnLat)) ? Number(selectedSpawnLat) : DEFAULT_SPAWN_LAT;
-            myAircraft.lng = normalizeLongitude(Number.isFinite(Number(selectedSpawnLng)) ? Number(selectedSpawnLng) : DEFAULT_SPAWN_LNG);
-
-            myAircraft.id = myCallsign;
-            myAircraft.aircraftType = myAircraftType;
-            myAircraft.atcChannel = atcChannel;
-            myAircraft.gameOver = false;
-            myAircraft.isDisabled = false;
-            myAircraft.requiresEmergencyLanding = false;
-            myAircraft.emergencyLanded = false;
-            myAircraft.isEmergency = false;
-            myAircraft.speed = myAircraft.isLanded ? 0 : (myAircraftType === 'HELICOPTER' ? helicopterTargetSpeed : getCruiseSpeedForAircraft(myAircraftType));
-            myAircraft.targetSpeed = myAircraft.speed;
-            syncHelicopterSpeedControl();
-            document.getElementById('pilotAltInput').value = Math.round(myAircraft.targetAlt);
-            document.getElementById('pilotTargetAltVal').innerText = `목표 ${Math.round(myAircraft.targetAlt).toLocaleString()} FT`;
-
-            document.getElementById('myCallsignDisplay').innerText = myCallsign;
-            document.getElementById('serverDisplay').innerText = serverId;
-            document.getElementById('channelDisplay').innerText = atcChannel;
-            document.getElementById('myRoleDisplay').innerText = myRole;
-            document.getElementById('pilotTitleCallsign').innerText = `MY AIRCRAFT (${myCallsign})`;
-            document.getElementById('setupModal').classList.add('hidden');
-
-            // Toggle panels based on role
-            if (myRole === 'ATC') {
-                document.getElementById('pilotControlPanel').classList.add('hidden');
-                document.getElementById('atcControlPanel').classList.remove('hidden');
-            } else {
-                document.getElementById('pilotControlPanel').classList.remove('hidden');
-                document.getElementById('atcControlPanel').classList.add('hidden');
-            }
-
-            document.getElementById('pilotTitleCallsign').innerText = `${myAircraftType === 'FIGHTER' ? 'FIGHTER' : myAircraftType === 'HELICOPTER' ? 'COMBAT HELI' : myAircraftType === 'TERRORIST' ? 'TERRORIST' : 'MY AIRCRAFT'} (${myCallsign})`;
-            document.getElementById('btnAttack').classList.toggle('hidden', !(myRole === 'PILOT' && isCombatAircraftType(myAircraftType)));
-            document.getElementById('combatTargetInfo').classList.toggle('hidden', !(myRole === 'PILOT' && isCombatAircraftType(myAircraftType)));
-            updateCombatStatusUI();
-            document.getElementById('atcRadioLog').innerHTML = '';
-
-            try {
-                // 선택한 서버에 맞는 실시간 동기화를 연결합니다.
-                await subscribeToServerSync();
-            } catch (err) {
-                const code = err?.code ? `\n오류 코드: ${err.code}` : '';
-                const message = err?.message || String(err);
-                const origin = `\n\n현재 주소: ${location.href}\n프로토콜: ${location.protocol}`;
-                const hint = location.protocol === 'file:'
-                    ? '\n\n지금 HTML 파일을 직접 열고 있습니다(file://). localhost 또는 Firebase Hosting처럼 http/https 주소에서 실행해 주세요.'
-                    : '';
-                alert(`Firebase 인증에 실패했습니다.${code}\n\n${message}${origin}${hint}`);
-                console.error('Firebase startup error:', err);
-                return;
-            }
-
-            if (!map) initMap();
-            await pushMyStateToFirestore();
-            startPhysicsAndSyncLoop();
-            // 접속 시스템 메시지는 ATC 기록에 남기지 않습니다.
-        };
-
-        // 지구 경도는 -180°와 +180°에서 연결됩니다.
-        function normalizeLongitude(lng) {
-            return ((Number(lng) + 180) % 360 + 360) % 360 - 180;
-        }
-
-        function formatCoordinate(lat, lng) {
-            return `${Number(lat).toFixed(4)}, ${Number(normalizeLongitude(lng)).toFixed(4)}`;
-        }
-
-        function ensureSpawnPickerMap() {
-            if (spawnPickerMap) {
-                setTimeout(() => spawnPickerMap.invalidateSize(), 50);
-                return;
-            }
-
-            spawnPickerMap = L.map('spawnPickerMap', {
-                center: [selectedSpawnLat, selectedSpawnLng],
-                zoom: 5,
-                zoomControl: true,
-                worldCopyJump: true,
-                attributionControl: true
-            });
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                subdomains: 'abcd',
-                maxZoom: 14,
-                minZoom: 2,
-                attribution: '&copy; OpenStreetMap &copy; CARTO'
-            }).addTo(spawnPickerMap);
-
-            spawnPickerMap.on('click', (e) => {
-                selectedSpawnLat = Math.max(-89.9999, Math.min(89.9999, Number(e.latlng.lat)));
-                selectedSpawnLng = normalizeLongitude(e.latlng.lng);
-                updateSpawnPickerMarker();
-            });
-
-            updateSpawnPickerMarker();
-        }
-
-        function updateSpawnPickerMarker() {
-            if (!spawnPickerMap) return;
-            const lat = Number(selectedSpawnLat);
-            const lng = normalizeLongitude(Number(selectedSpawnLng));
-            if (!spawnPickerMarker) {
-                spawnPickerMarker = L.marker([lat, lng], { draggable: false }).addTo(spawnPickerMap);
-            } else {
-                spawnPickerMarker.setLatLng([lat, lng]);
-            }
-            const text = formatCoordinate(lat, lng);
-            const coordsEl = document.getElementById('spawnPickerCoords');
-            const textEl = document.getElementById('spawnLocationText');
-            if (coordsEl) coordsEl.innerText = text;
-            if (textEl) textEl.innerText = `선택 위치: ${text}`;
-        }
-
-        window.openSpawnPicker = function() {
-            const modal = document.getElementById('spawnPickerModal');
-            if (!modal) return;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            ensureSpawnPickerMap();
-            setTimeout(() => {
-                if (spawnPickerMap) {
-                    spawnPickerMap.invalidateSize();
-                    spawnPickerMap.setView([selectedSpawnLat, selectedSpawnLng], Math.max(spawnPickerMap.getZoom(), 5), { animate: false });
-                }
-            }, 80);
-        };
-
-        window.closeSpawnPicker = function() {
-            const modal = document.getElementById('spawnPickerModal');
-            if (!modal) return;
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
-
-        window.confirmSpawnPicker = function() {
-            updateSpawnPickerMarker();
-            closeSpawnPicker();
-        };
-
-        // Leaflet은 세계지도를 반복 표시하므로, 화면에서 클릭한 '세계 복사본'을 보존합니다.
-        // 현재 위치에서 가장 가까운 세계 복사본의 경도를 선택해 경계(+/-180)에서 생기는 오류를 막습니다.
-        function getWorldAwareClickLng(e) {
-            const baseLng = normalizeLongitude(e.latlng.lng);
-            if (!map || !e.layerPoint) return baseLng;
-
-            const zoom = map.getZoom();
-            const targetX = e.layerPoint.x;
-            let bestLng = baseLng;
-            let bestDiff = Infinity;
-
-            for (let k = -2; k <= 2; k++) {
-                const candidateLng = baseLng + 360 * k;
-                const point = map.latLngToLayerPoint(L.latLng(e.latlng.lat, candidateLng));
-                const diff = Math.abs(point.x - targetX);
-                if (diff < bestDiff) {
-                    bestDiff = diff;
-                    bestLng = candidateLng;
-                }
-            }
-            return bestLng;
-        }
-
-        function initMap() {
-            map = L.map('map', {
-                center: [36.5, 127.8],
-                zoom: 7,
-                zoomControl: false,
-                worldCopyJump: true,
-                attributionControl: true
-            });
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                subdomains: 'abcd',
-                maxZoom: 14,
-                minZoom: 4,
-                attribution: '&copy; OpenStreetMap &copy; CARTO'
-            }).addTo(map);
-
-            L.control.zoom({ position: 'bottomleft' }).addTo(map);
-            waypointPolylineGroup = L.layerGroup().addTo(map);
-
-            map.on('click', async (e) => {
-                const clickLat = Math.max(-89.9999, Math.min(89.9999, Number(e.latlng.lat)));
-                const clickLng = getWorldAwareClickLng(e);
-
-                // PILOT MODE: Add Waypoint to My Aircraft
-                if (myRole === 'PILOT') {
-                    const wptName = `WPT${waypointSeq++}`;
-                    myAircraft.waypoints.push({ lat: clickLat, lng: clickLng, name: wptName });
-                    document.getElementById('userNextWpt').innerText = myAircraft.waypoints[0].name;
-                    drawMyWaypoints();
-                }
-            });
-        }
-
-        async function initFirebaseCore() {
-            if (firebaseReady) return;
-            if (firebaseInitPromise) return firebaseInitPromise;
-
-            firebaseInitPromise = (async () => {
-                if (!app) app = initializeApp(firebaseConfig);
-                if (!db) db = getFirestore(app);
-                if (!auth) auth = getAuth(app);
-
-                let credential;
-                if (auth.currentUser) {
-                    credential = { user: auth.currentUser };
-                } else if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    credential = await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    credential = await signInAnonymously(auth);
-                }
-
-                if (!credential?.user) throw new Error('Firebase 인증은 실행됐지만 사용자 정보를 받지 못했습니다.');
-                myUserId = credential.user.uid;
-                firebaseReady = true;
-                firebaseInitError = null;
-            })();
-
-            try {
-                return await firebaseInitPromise;
-            } finally {
-                if (!firebaseReady) firebaseInitPromise = null;
-            }
-        }
-
-        async function subscribeToServerSync() {
-            if (!auth?.currentUser || !db) throw new Error('Firebase 인증이 완료되지 않았습니다.');
-
-            if (playersUnsubscribe) { playersUnsubscribe(); playersUnsubscribe = null; }
-            if (radioUnsubscribe) { radioUnsubscribe(); radioUnsubscribe = null; }
-            remotePlayers.clear();
-
-            const playersCol = collection(db, 'servers', serverId, 'players');
-            playersUnsubscribe = onSnapshot(playersCol, (snapshot) => {
-                const now = Date.now();
-                const activeIds = new Set();
-                remotePlayers.clear();
-
-                snapshot.forEach(docSnap => {
-                    const data = docSnap.data() || {};
-                    const uid = docSnap.id;
-
-                    if (uid === myUserId) {
-                        // 자신의 일반 상태(alt/targetAlt 포함)는 Firestore snapshot으로
-                        // 다시 덮어쓰지 않습니다. 과거 저장 요청이 늦게 반영되면
-                        // 12000 FT 같은 오래된 값으로 되돌아가는 문제가 생길 수 있습니다.
-                        // ATC의 변경은 atcCommand / atcRouteCommand로만 받습니다.
-                        const routeCmd = data.atcRouteCommand;
-                        const routeAt = Number(routeCmd?.issuedAt) || 0;
-                        if (myRole === 'PILOT' && routeAt > Number(myAircraft._lastAtcRouteCommandAt || 0) && Array.isArray(routeCmd?.waypoints)) {
-                            myAircraft.waypoints = routeCmd.waypoints.map(w => ({
-                                lat: Number(w.lat), lng: normalizeLongitude(Number(w.lng)), name: String(w.name || 'ATC_WPT')
-                            })).filter(w => Number.isFinite(w.lat) && Number.isFinite(w.lng));
-                            myAircraft.isHolding = Boolean(routeCmd.isHolding);
-                            myAircraft._lastAtcRouteCommandAt = routeAt;
-                            const nextWptEl = document.getElementById('userNextWpt');
-                            if (nextWptEl) nextWptEl.innerText = myAircraft.waypoints[0]?.name || 'DIRECT HEADING';
-                            drawMyWaypoints();
-                        }
-
-                        const cmd = data.atcCommand;
-                        const cmdAt = Number(cmd?.issuedAt) || 0;
-                        if (myRole === 'PILOT' && cmdAt > Number(myAircraft._lastAtcCommandAt || 0) && cmd?.patch && typeof cmd.patch === 'object') {
-                            Object.assign(myAircraft, cmd.patch);
-                            myAircraft._lastAtcCommandAt = cmdAt;
-                            updateCombatStatusUI();
-                            renderAllPlayers(performance.now());
-                        }
-                        return;
-                    }
-
-                    const lat = Number(data.lat);
-                    const lng = Number(data.lng);
-                    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-                    const lastSeen = Number(data.lastUpdated) || 0;
-                    if (!lastSeen || now - lastSeen > PRESENCE_TIMEOUT_MS) return;
-
-                    // UID를 기준으로 모든 플레이어를 유지합니다.
-                    // 같은 콜사인을 쓰는 플레이어도 서로 다른 기체로 표시합니다.
-                    const normalizedData = {
-                        ...data,
-                        lng: normalizeLongitude(lng),
-                        lastUpdated: lastSeen,
-                        uid
-                    };
-                    activeIds.add(uid);
-                    remotePlayers.set(uid, normalizedData);
-                });
-                for (const [uid] of playerMarkers.entries()) {
-                    if (uid !== myUserId && !activeIds.has(uid)) removePlayerMarker(uid);
-                }
-                updatePlayersUIList();
-            }, (error) => {
-                console.error('Firestore player sync error:', error);
-                document.getElementById('connStatusDot').className = 'w-3 h-3 rounded-full bg-red-500';
-            });
-
-            // 통신 로그는 '오래된 메시지 → 최신 메시지' 순서로 위에서 아래로 표시합니다.
-            // 가장 최신 메시지가 항상 맨 아래에 오도록 timestamp 기준으로 오름차순 정렬합니다.
-            const radioCol = query(collection(db, 'servers', serverId, 'radio'), orderBy('timestamp', 'desc'), limit(80));
-            radioUnsubscribe = onSnapshot(radioCol, (snapshot) => {
-                const messages = [];
-                snapshot.forEach(d => {
-                    const m = d.data() || {};
-                    if (normalizeAtcChannel(m.channel) === normalizeAtcChannel(atcChannel) && isConversationRadioMessage(m.sender, m.text)) {
-                        messages.push({ ...m, _messageId: d.id });
-                    }
-                });
-
-                // 최신 시간이 큰 값이므로 작은 시간부터 표시 → 최신 메시지가 맨 아래.
-                // 같은 시간에 저장된 메시지는 문서 ID로 한 번 더 정렬해 순서를 안정화합니다.
-                messages.sort((a, b) => {
-                    const timeDiff = (Number(a.timestamp) || 0) - (Number(b.timestamp) || 0);
-                    if (timeDiff !== 0) return timeDiff;
-                    return String(a._messageId || '').localeCompare(String(b._messageId || ''));
-                });
-
-                const visibleMessages = messages.slice(-80);
-                const logBox = document.getElementById('atcRadioLog');
-                logBox.innerHTML = '';
-                visibleMessages.forEach(m => appendRadioMessage(m.sender, m.text, m.timestamp));
-
-                // 새 메시지가 들어오면 항상 가장 최신(맨 아래)으로 이동합니다.
-                requestAnimationFrame(() => {
-                    logBox.scrollTop = logBox.scrollHeight;
-                });
-            }, (error) => console.error('Radio sync error:', error));
-
-            document.getElementById('connStatusDot').className = 'w-3 h-3 rounded-full bg-emerald-400 pulse-green';
-        }
-
-        async function initFirebaseAndSync() {
-            if (!firebaseReady) await initFirebaseCore();
-            await subscribeToServerSync();
-        }
-
-        window.addEventListener('pagehide', () => {
-            // Firestore를 브라우저에서 직접 삭제하지 않습니다.
-            // 서버는 lastUpdated 타임아웃으로 오프라인 플레이어를 정리합니다.
-        });
-
-        function pushMyStateToFirestore() {
-            if (!auth?.currentUser || !db || !serverId) return Promise.resolve();
-
-            // Firebase에는 화면/물리 계산에 필요한 최소한의 상태만 보냅니다.
-            // 내부 임시값이나 ATC 명령 객체 등을 매번 같이 저장하지 않아
-            // Firestore 문서 크기와 변경량을 줄입니다.
-            const now = Date.now();
-            myAircraft.role = myRole;
-            myAircraft.online = true;
-            myAircraft.lastUpdated = Math.max(Number(myAircraft.lastUpdated) || 0, now);
-
-            const safeAircraft = {
-                id: myCallsign,
-                lat: Number(myAircraft.lat) || 0,
-                lng: normalizeLongitude(Number(myAircraft.lng) || 0),
-                alt: Number(myAircraft.alt) || 0,
-                targetAlt: Number(myAircraft.targetAlt) || 0,
-                speed: Number(myAircraft.speed) || 0,
-                targetSpeed: Number(myAircraft.targetSpeed) || 0,
-                heading: Number(myAircraft.heading) || 0,
-                targetHeading: Number(myAircraft.targetHeading) || 0,
-                squawk: String(myAircraft.squawk || '7000'),
-                role: myRole,
-                aircraftType: myAircraftType,
-                atcChannel: normalizeAtcChannel(atcChannel),
-                isLanded: Boolean(myAircraft.isLanded),
-                isDisabled: Boolean(myAircraft.isDisabled),
-                waypoints: Array.isArray(myAircraft.waypoints)
-                    ? myAircraft.waypoints.slice(0, 20).map(w => ({
-                        lat: Number(w.lat),
-                        lng: normalizeLongitude(Number(w.lng)),
-                        name: String(w.name || 'WPT').slice(0, 40)
-                    })).filter(w => Number.isFinite(w.lat) && Number.isFinite(w.lng))
-                    : [],
-                isHolding: Boolean(myAircraft.isHolding),
-                isEmergency: Boolean(myAircraft.isEmergency),
-                requiresEmergencyLanding: Boolean(myAircraft.requiresEmergencyLanding),
-                emergencyLanded: Boolean(myAircraft.emergencyLanded),
-                gameOver: Boolean(myAircraft.gameOver),
-                lastHitBy: myAircraft.lastHitBy ? String(myAircraft.lastHitBy).slice(0, 64) : null,
-                lastHitAt: Number(myAircraft.lastHitAt) || 0,
-                online: true,
-                lastUpdated: now
-            };
-
-            // Firestore 저장을 직렬화하여 오래된 요청이 최신 상태를 덮어쓰지 않게 합니다.
-            stateWriteChain = stateWriteChain
-                .catch(() => {})
-                .then(() => setDoc(
-                    doc(db, 'servers', serverId, 'players', myUserId),
-                    safeAircraft,
-                    { merge: true }
-                ))
-                .catch(e => {
-                    console.error('Game state sync failed:', e);
-                });
-
-            return stateWriteChain;
-        }
-
-        function startPhysicsAndSyncLoop() {
-            // 세션을 다시 시작해도 이전 프레임 시간으로 큰 dt가 계산되지 않도록 초기화합니다.
-            lastTimestamp = performance.now();
-            lastGameSync = 0;
-
-            if (heartbeatTimer) {
-                clearInterval(heartbeatTimer);
-                heartbeatTimer = null;
-            }
-
-            // requestAnimationFrame에 의존하지 않고 별도 heartbeat로 접속 상태를 유지합니다.
-            // 모바일 브라우저에서 프레임이 일시적으로 줄어들어도 다른 플레이어에게 기체가 계속 보입니다.
-            heartbeatTimer = setInterval(() => {
-                if (auth?.currentUser && db && serverId) {
-                    pushMyStateToFirestore();
-                }
-            }, FIRESTORE_STATE_SYNC_INTERVAL_MS);
-
-            function loop(now) {
-                const dt = Math.min((now - lastTimestamp) / 1000, 0.2);
-                lastTimestamp = now;
-
-                if (myRole === 'PILOT') updateMyPhysics(dt);
-                renderAllPlayers(now);
-
-                // Firestore 전송은 별도 heartbeat에서만 수행합니다.
-                // 렌더링 프레임마다 Firebase를 호출하지 않습니다.
-
-                if (myRole === 'ATC' && trackedUserId && now - lastAtcPanAt >= 120) {
-                    const tracked = remotePlayers.get(trackedUserId);
-                    if (tracked && isSameAtcChannel(tracked)) {
-                        const trackedRecord = playerMarkers.get(trackedUserId);
-                        const trackedPos = trackedRecord?.marker?.getLatLng();
-                        if (trackedPos) map.panTo(trackedPos, { animate: false });
-                        else map.panTo([tracked.lat, tracked.lng], { animate: false });
-                        lastAtcPanAt = now;
-                    } else if (trackedUserId) {
-                        clearTrackedAircraft();
-                    }
-                }
-
-                requestAnimationFrame(loop);
-            }
-            requestAnimationFrame(loop);
-        }
-
-        function updateMyPhysics(dt) {
-            // Game over / disabled aircraft are fully stopped.
-            if (myAircraft.gameOver || myAircraft.isDisabled) {
-                myAircraft.speed = 0;
-                myAircraft.targetSpeed = 0;
-                updateCombatStatusUI();
-                return;
-            }
-
-            // Emergency hit: aircraft can still fly, but must land before it can relaunch.
-            if (myAircraft.isLanded) {
-                myAircraft.speed = 0;
-                myAircraft.targetSpeed = 0;
-                updateCombatStatusUI();
-                return;
-            }
-
-            if (myAircraft.requiresEmergencyLanding) {
-                const emergencyCruise = Math.max(8000, Math.round(getCruiseSpeedForAircraft(myAircraftType) * 0.45));
-                myAircraft.speed = Math.min(Number(myAircraft.speed) || emergencyCruise, emergencyCruise);
-                myAircraft.targetSpeed = emergencyCruise;
-            }
-
-            // 속도에 비해 웨이포인트가 가까워도 그냥 지나치지 않도록
-            // 이번 프레임의 이동량을 계산한 뒤, 남은 이동량을 다음 웨이포인트에 이어서 사용합니다.
-            let remainingNm = Math.max(0, (Number(myAircraft.speed) || 0) / 3600 * Math.max(dt, 0));
-            let routeChanged = false;
-
-            // HOLD는 웨이포인트보다 우선합니다.
-            if (myAircraft.isHolding) {
-                myAircraft.targetHeading = (Number(myAircraft.targetHeading) + 3 * dt) % 360;
-                myAircraft.heading = normalizeHeading(myAircraft.targetHeading);
-                if (remainingNm > 0) {
-                    moveGreatCircle(myAircraft, remainingNm, myAircraft.heading);
-                }
-            } else {
-                // WPT1 -> WPT2 -> WPT3 순서대로 정확히 통과합니다.
-                while (myAircraft.waypoints.length > 0 && remainingNm > 0) {
-                    const targetWpt = myAircraft.waypoints[0];
-                    if (!isValidWaypoint(targetWpt)) {
-                        myAircraft.waypoints.shift();
-                        routeChanged = true;
-                        continue;
-                    }
-
-                    const targetLat = Number(targetWpt.lat);
-                    const targetLng = normalizeLongitude(Number(targetWpt.lng));
-                    const distNm = getDistanceNm(myAircraft.lat, myAircraft.lng, targetLat, targetLng);
-
-                    // 거의 도착한 경우 실제 좌표를 웨이포인트에 맞춘 뒤 다음 점으로 넘깁니다.
-                    if (distNm <= 0.05) {
-                        myAircraft.lat = targetLat;
-                        myAircraft.lng = targetLng;
-                        myAircraft.waypoints.shift();
-                        routeChanged = true;
-                        continue;
-                    }
-
-                    const bearing = getBearing(myAircraft.lat, myAircraft.lng, targetLat, targetLng);
-                    // 항로 비행에서는 매 프레임 목표 웨이포인트를 향하도록 기수를 맞춥니다.
-                    // 기존의 느린 선회 때문에 고속 비행 시 WPT를 크게 빗나가던 문제를 제거합니다.
-                    myAircraft.targetHeading = bearing;
-                    myAircraft.heading = bearing;
-
-                    if (remainingNm >= distNm) {
-                        // 이번 프레임 이동량이 WPT까지의 거리보다 크면 정확히 도착시키고
-                        // 남은 이동량으로 다음 WPT까지 계속 진행합니다.
-                        myAircraft.lat = targetLat;
-                        myAircraft.lng = targetLng;
-                        remainingNm -= distNm;
-                        myAircraft.waypoints.shift();
-                        routeChanged = true;
-                    } else {
-                        moveGreatCircle(myAircraft, remainingNm, bearing);
-                        remainingNm = 0;
-                    }
-                }
-
-                // 항로가 끝나면 마지막 기수 방향으로 계속 직진합니다.
-                if (myAircraft.waypoints.length === 0 && remainingNm > 0) {
-                    myAircraft.heading = normalizeHeading(myAircraft.heading);
-                    myAircraft.targetHeading = myAircraft.heading;
-                    moveGreatCircle(myAircraft, remainingNm, myAircraft.heading);
-                    remainingNm = 0;
-                }
-            }
-
-            if (routeChanged) {
-                const nextWptEl = document.getElementById('userNextWpt');
-                if (nextWptEl) {
-                    nextWptEl.innerText = myAircraft.waypoints[0]?.name || 'DIRECT HEADING';
-                }
-                drawMyWaypoints();
-            }
-
-            // 고도는 목표값으로 즉시 변경
-            myAircraft.alt = myAircraft.targetAlt;
-
-            if (performance.now() - lastTelemetryUpdateAt >= TELEMETRY_UPDATE_INTERVAL_MS) {
-                lastTelemetryUpdateAt = performance.now();
-                document.getElementById('userAltVal').innerText = `${Math.round(myAircraft.alt).toLocaleString()} FT`;
-                document.getElementById('userHdgVal').innerText = `${Math.round(myAircraft.heading).toString().padStart(3, '0')}°`;
-                document.getElementById('userSpdVal').innerText = `${formatDisplaySpeed(myAircraft.speed)} KT`;
-            }
-        }
-
-        function normalizeHeading(heading) {
-            const value = Number(heading);
-            if (!Number.isFinite(value)) return 0;
-            return ((value % 360) + 360) % 360;
-        }
-
-        function isValidWaypoint(wpt) {
-            const lat = Number(wpt?.lat);
-            const lng = Number(wpt?.lng);
-            return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90;
-        }
-
-        function moveGreatCircle(aircraft, distanceNm, bearingDeg) {
-            if (!(distanceNm > 0)) return;
-
-            const earthRadiusNm = 3440.065;
-            const angularDistance = distanceNm / earthRadiusNm;
-            const bearing = normalizeHeading(bearingDeg) * Math.PI / 180;
-            const lat1 = Number(aircraft.lat) * Math.PI / 180;
-            const lon1 = Number(aircraft.lng) * Math.PI / 180;
-
-            const sinLat1 = Math.sin(lat1);
-            const cosLat1 = Math.cos(lat1);
-            const sinAd = Math.sin(angularDistance);
-            const cosAd = Math.cos(angularDistance);
-
-            const lat2 = Math.asin(
-                sinLat1 * cosAd +
-                cosLat1 * sinAd * Math.cos(bearing)
-            );
-
-            const lon2 = lon1 + Math.atan2(
-                Math.sin(bearing) * sinAd * cosLat1,
-                cosAd - sinLat1 * Math.sin(lat2)
-            );
-
-            aircraft.lat = Math.max(-89.9999, Math.min(89.9999, lat2 * 180 / Math.PI));
-            aircraft.lng = normalizeLongitude(lon2 * 180 / Math.PI);
-        }
-
-        function renderAllPlayers(now = performance.now()) {
-            if (!map) return;
-            if (now - lastMarkerRenderAt < MARKER_RENDER_INTERVAL_MS) return;
-            lastMarkerRenderAt = now;
-
-            // Leaflet HTML 아이콘은 매 프레임 다시 만들면 매우 무거워집니다.
-            // 위치만 주기적으로 갱신하고, 아이콘은 상태가 바뀔 때만 교체합니다.
-            if (myRole === 'PILOT') {
-                upsertPlayerMarker(myUserId, myAircraft, true);
-            } else {
-                removePlayerMarker(myUserId);
-            }
-
-            remotePlayers.forEach((pData, uid) => {
-                upsertPlayerMarker(uid, pData, false);
-            });
-        }
-
-        function getAircraftVisual(pData) {
-            const type = String(pData?.aircraftType || 'AIRLINER').toUpperCase();
-            if (pData?.role === 'ATC') return { kind: 'ATC', label: 'ATC', color: '#f59e0b' };
-            if (type === 'HELICOPTER') return { kind: 'HELICOPTER', label: 'COMBAT HELI', color: '#f59e0b' };
-            if (type === 'FIGHTER') return { kind: 'FIGHTER', label: 'FIGHTER', color: '#ef4444' };
-            if (type === 'TERRORIST') return { kind: 'TERRORIST', label: 'TERRORIST', color: '#b91c1c' };
-            return { kind: 'AIRLINER', label: 'AIRLINER', color: '#00f3ff' };
-        }
-
-        function buildAircraftSvg(kind, color) {
-            // 외부 아이콘 폰트에 의존하지 않는 SVG 아이콘입니다.
-            // 모든 기체는 '위쪽 = 북쪽'을 기본 방향으로 그려져 heading 그대로 회전합니다.
-            if (kind === 'HELICOPTER') {
-                return `
-                    <svg class="aircraft-svg" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
-                        <g fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 8H32" />
-                            <path d="M14 8V13M26 8V13" />
-                            <path d="M20 12V29" />
-                            <path d="M15 18C15 15.8 16.8 14 20 14C23.2 14 25 15.8 25 18V26C25 28.2 23.2 30 20 30C16.8 30 15 28.2 15 26Z" fill="${color}" fill-opacity="0.18"/>
-                            <path d="M15 21L8 25M25 21L32 25" />
-                            <path d="M8 25L5 29M32 25L35 29" />
-                            <path d="M18 30L16 34M22 30L24 34" />
-                        </g>
-                    </svg>`;
-            }
-            if (kind === 'FIGHTER') {
-                return `
-                    <svg class="aircraft-svg" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
-                        <path d="M20 3L23 15L35 22L27 24L24 22V35L20 38L16 35V22L13 24L5 22L17 15Z"
-                              fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
-                        <path d="M20 7V31" stroke="#111827" stroke-opacity="0.38" stroke-width="1.2"/>
-                    </svg>`;
-            }
-            if (kind === 'TERRORIST') {
-                return `
-                    <svg class="aircraft-svg" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
-                        <path d="M20 3L23 12L34 18L27 21L24 20V30L29 35H23L20 32L17 35H11L16 30V20L13 21L6 18L17 12Z"
-                              fill="${color}" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
-                        <path d="M20 6V29" stroke="#111827" stroke-opacity="0.4" stroke-width="1.4"/>
-                        <circle cx="20" cy="15" r="2" fill="#fff" fill-opacity="0.7"/>
-                    </svg>`;
-            }
-            if (kind === 'ATC') {
-                return `
-                    <svg class="aircraft-svg" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
-                        <path d="M13 29C9 29 7 26 7 22V15C7 10.6 10.6 7 15 7H25C29.4 7 33 10.6 33 15V22C33 26 31 29 27 29" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M12 20C12 15.6 15.6 12 20 12C24.4 12 28 15.6 28 20" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
-                        <path d="M15 29L12 34M25 29L28 34" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
-                    </svg>`;
-            }
-            return `
-                <svg class="aircraft-svg" width="30" height="30" viewBox="0 0 40 40" aria-hidden="true">
-                    <path d="M20 3C21.7 3 23 4.3 23 6V14L35 20V24L23 21V34L28 38H22L20 35L18 38H12L17 34V21L5 24V20L17 14V6C17 4.3 18.3 3 20 3Z"
-                          fill="${color}" stroke="${color}" stroke-width="1.2" stroke-linejoin="round"/>
-                </svg>`;
-        }
-
-        function buildPlayerIconHtml(pData, isSelf) {
-            const visual = getAircraftVisual(pData);
-            const stateColor = pData.isDisabled || pData.gameOver ? '#ff3344' : (pData.isLanded ? '#9ca3af' : (pData.isEmergency ? '#ff3344' : visual.color));
-            return {
-                // heading/위치/고도/속도가 바뀌어도 아이콘 DOM을 다시 만들지 않습니다.
-                key: [pData.role, pData.aircraftType, pData.isDisabled, pData.isLanded, pData.isEmergency, pData.gameOver, pData.requiresEmergencyLanding, isSelf].join('|'),
-                html: `
-                    <div class="relative flex items-start" style="width:130px;">
-                        <div class="aircraft-symbol w-9 h-9 flex items-center justify-center" style="transform:rotate(${normalizeHeading(pData.heading || 0)}deg); transform-origin:center; will-change:transform; transition:transform 0.12s linear;">
-                            ${buildAircraftSvg(visual.kind, visual.color)}
-                        </div>
-                        <div class="ml-1 bg-gray-950/90 px-1.5 py-0.5 rounded border border-gray-800 text-[9px] font-mono leading-tight whitespace-nowrap pointer-events-none" style="color:${stateColor}">
-                            <div class="font-bold flex items-center gap-1">
-                                ${pData.id} [${visual.label}] ${pData.isLanded ? '<span class="text-gray-400">LANDED</span>' : ''} ${pData.isDisabled || pData.gameOver ? '<span class="text-red-500 font-black">GAME OVER</span>' : ''} ${pData.requiresEmergencyLanding ? '<span class="text-amber-300 font-black">EMERGENCY</span>' : ''} ${pData.isEmergency ? '<span class="text-red-500 font-black">!</span>' : ''}
-                            </div>
-                            <div class="aircraft-telemetry">ALT ${Math.round(pData.alt || 0).toLocaleString()} FT • FL${Math.round((pData.alt || 0) / 100)} • ${formatDisplaySpeed(pData.speed || 0)}kt</div>
-                        </div>
-                    </div>
-                `
-            };
-        }
-
-        function getSmoothMarkerState(pData, isSelf, now) {
-            const lat = Number(pData?.lat);
-            const lng = Number(pData?.lng);
-            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-
-            if (isSelf) {
-                return { lat, lng, heading: normalizeHeading(Number(pData.heading) || 0) };
-            }
-
-            // Firestore 동기화 사이의 1초 정도를 마지막 기수/속도로 화면에서 예측합니다.
-            const lastUpdated = Number(pData.lastUpdated) || now;
-            const ageSec = Math.min(2, Math.max(0, (now - lastUpdated) / 1000));
-            const stopped = Boolean(pData.isLanded || pData.isDisabled || pData.gameOver);
-            const speed = stopped ? 0 : Math.max(0, Number(pData.speed) || 0);
-            const display = { lat, lng: normalizeLongitude(lng) };
-            const distanceNm = (speed / 3600) * ageSec;
-            if (distanceNm > 0) moveGreatCircle(display, distanceNm, Number(pData.heading) || 0);
-            return {
-                lat: display.lat,
-                lng: display.lng,
-                heading: normalizeHeading(Number(pData.heading) || 0)
-            };
-        }
-
-        function updatePlayerMarkerTelemetryImmediate(uid, pData) {
-            const record = playerMarkers.get(uid);
-            const element = record?.marker?.getElement?.();
-            if (!element) return;
-            const telemetryEl = element.querySelector('.aircraft-telemetry');
-            if (!telemetryEl) return;
-            const alt = Math.round(Number(pData?.alt) || 0);
-            const speed = Number(pData?.speed) || 0;
-            telemetryEl.textContent = `ALT ${alt.toLocaleString()} FT • FL${Math.round(alt / 100)} • ${formatDisplaySpeed(speed)}kt`;
-        }
-
-        function upsertPlayerMarker(uid, pData, isSelf, now = performance.now()) {
-            if (!map) return;
-            const display = getSmoothMarkerState(pData, isSelf, now);
-            if (!display) return;
-
-            const iconData = buildPlayerIconHtml(pData, isSelf);
-            let record = playerMarkers.get(uid);
-
-            if (!record) {
-                const marker = L.marker([display.lat, display.lng], {
-                    icon: L.divIcon({ html: iconData.html, className: '', iconSize: [130, 50], iconAnchor: [15, 15] }),
-                    keyboard: false
-                }).addTo(map);
-
-                marker.on('click', () => {
-                    const current = uid === myUserId ? myAircraft : remotePlayers.get(uid);
-                    if (!current) return;
-                    if (canAtcControlPlayer(current)) {
-                        selectTrackedPilot(uid);
-                    } else if (myRole === 'ATC' && current.role === 'PILOT' && !isSameAtcChannel(current)) {
-                        alert(`통신 ID ${atcChannel}에 연결된 항공기가 아닙니다.\n\n해당 항공기의 통신 ID: ${current.atcChannel || '미설정'}`);
-                    } else if (myRole === 'PILOT' && isCombatAircraftType(myAircraftType) && current.role === 'PILOT' && uid !== myUserId) {
-                        selectCombatTarget(uid);
-                    }
-                });
-
-                record = {
-                    marker,
-                    iconKey: iconData.key,
-                    symbolEl: marker.getElement()?.querySelector('.aircraft-symbol') || null
-                };
-                playerMarkers.set(uid, record);
-            } else {
-                record.marker.setLatLng([display.lat, display.lng]);
-                if (!record.symbolEl || !record.symbolEl.isConnected) {
-                    record.symbolEl = record.marker.getElement()?.querySelector('.aircraft-symbol') || null;
-                }
-                if (record.symbolEl) {
-                    record.symbolEl.style.transform = `rotate(${display.heading}deg)`;
-                }
-
-                // 고도/속도는 아이콘을 다시 만들지 않고 텍스트만 즉시 갱신합니다.
-                const telemetryEl = record.marker.getElement()?.querySelector('.aircraft-telemetry');
-                if (telemetryEl) {
-                    telemetryEl.textContent = `ALT ${Math.round(Number(pData.alt) || 0).toLocaleString()} FT • FL${Math.round((Number(pData.alt) || 0) / 100)} • ${formatDisplaySpeed(pData.speed || 0)}kt`;
-                }
-
-                // 기체 종류/상태가 바뀔 때만 아이콘 DOM을 교체합니다.
-                if (record.iconKey !== iconData.key) {
-                    record.marker.setIcon(L.divIcon({ html: iconData.html, className: '', iconSize: [130, 50], iconAnchor: [15, 15] }));
-                    record.iconKey = iconData.key;
-                    record.symbolEl = record.marker.getElement()?.querySelector('.aircraft-symbol') || null;
-                }
-            }
-        }
-
-        function removePlayerMarker(uid) {
-            const record = playerMarkers.get(uid);
-            if (record) {
-                map.removeLayer(record.marker);
-                playerMarkers.delete(uid);
-            }
-        }
-
-        function drawMyWaypoints() {
-            if (!waypointPolylineGroup) return;
-            waypointPolylineGroup.clearLayers();
-            if (!Array.isArray(myAircraft.waypoints) || myAircraft.waypoints.length === 0) return;
-
-            const routePoints = [[Number(myAircraft.lat), normalizeLongitude(Number(myAircraft.lng))]];
-
-            myAircraft.waypoints.forEach(wpt => {
-                if (!isValidWaypoint(wpt)) return;
-                const lat = Number(wpt.lat);
-                const lng = normalizeLongitude(Number(wpt.lng));
-                routePoints.push([lat, lng]);
-
-                const wptIcon = L.divIcon({
-                    html: `<div class="bg-cyan-500 text-gray-950 font-bold text-[9px] px-1 rounded shadow-md border border-cyan-300 font-mono">${String(wpt.name || 'WPT')}</div>`,
-                    className: '',
-                    iconAnchor: [15, 10]
-                });
-                L.marker([lat, lng], { icon: wptIcon }).addTo(waypointPolylineGroup);
-            });
-
-            // +/-180도 경계를 넘는 선은 두 개의 선분으로 나눠서
-            // 세계 반대편까지 길게 이어지는 현상을 방지합니다.
-            let segment = [routePoints[0]];
-            for (let i = 1; i < routePoints.length; i++) {
-                const prev = routePoints[i - 1];
-                const cur = routePoints[i];
-                if (Math.abs(cur[1] - prev[1]) > 180) {
-                    L.polyline(segment, { color: '#00f3ff', weight: 2, dashArray: '4, 4' }).addTo(waypointPolylineGroup);
-                    segment = [cur];
-                } else {
-                    segment.push(cur);
-                }
-            }
-            if (segment.length >= 2) {
-                L.polyline(segment, { color: '#00f3ff', weight: 2, dashArray: '4, 4' }).addTo(waypointPolylineGroup);
-            }
-        }
-
-        // --- ATC Controller & Callsigns ---
-        function onCallsignSearchInput(val) {
-            const query = val.trim().toUpperCase();
-            const suggestionsEl = document.getElementById('atcSearchSuggestions');
-            suggestionsEl.innerHTML = '';
-
-            if (query.length === 0) {
-                suggestionsEl.classList.add('hidden');
-                return;
-            }
-
-            const matches = [];
-            remotePlayers.forEach((p, uid) => {
-                if (canAtcControlPlayer(p) && p.id.includes(query)) {
-                    matches.push({ uid, ...p });
-                }
-            });
-
-            if (matches.length > 0) {
-                matches.forEach(m => {
-                    const div = document.createElement('div');
-                    div.className = 'px-3 py-1.5 hover:bg-cyan-900/40 text-xs font-mono text-cyan-300 cursor-pointer flex justify-between border-b border-gray-900';
-                    div.innerHTML = `<span>${m.id}</span> <span class="text-gray-500">ALT ${Math.round(m.alt || 0).toLocaleString()} FT</span>`;
-                    div.onclick = () => {
-                        selectTrackedPilot(m.uid);
-                        document.getElementById('atcSearchInput').value = m.id;
-                        suggestionsEl.classList.add('hidden');
-                    };
-                    suggestionsEl.appendChild(div);
-                });
-                suggestionsEl.classList.remove('hidden');
-            } else {
-                suggestionsEl.classList.add('hidden');
-            }
-        }
-
-        function selectTrackedPilot(uid) {
-            const target = remotePlayers.get(uid);
-            if (!target) return;
-
-            if (!canAtcControlPlayer(target)) {
-                trackedUserId = null;
-                alert(`이 항공기는 현재 통신 ID ${atcChannel}에 연결되어 있지 않습니다.`);
-                clearTrackedAircraft();
-                return;
-            }
-
-            trackedUserId = uid;
-            map.panTo([target.lat, target.lng], { animate: true, duration: 0.5 });
-
-            document.getElementById('trackedCallsign').innerText = target.id;
-            document.getElementById('trackedSquawk').innerText = `SQK: ${target.squawk}`;
-            document.getElementById('trackedDetailInfo').innerHTML = `
-                <div class="grid grid-cols-2 gap-1 text-[11px] font-mono">
-                    <div>현재 고도: <span class="text-cyan-300">${Math.round(target.alt || 0).toLocaleString()} FT</span></div>
-                    <div>목표 고도: <span class="text-amber-300">${Math.round(target.targetAlt || target.alt || 0).toLocaleString()} FT</span></div>
-                    <div>기수: <span class="text-cyan-300">${Math.round(target.heading)}°</span></div>
-                    <div>속도: <span class="text-cyan-300">${formatDisplaySpeed(target.speed)} KT</span></div>
-                </div>
-            `;
-
-            document.getElementById('atcCommandSection').classList.remove('opacity-50', 'pointer-events-none');
-            document.getElementById('cmdHdgVal').innerText = `${Math.round(target.targetHeading || target.heading)}°`;
-            document.getElementById('cmdAltVal').innerText = `${Math.round(target.targetAlt || target.alt)} FT`;
-            document.getElementById('inputHdg').value = Math.round(target.targetHeading || target.heading);
-            document.getElementById('inputAlt').value = Math.round(target.targetAlt || target.alt);
-
-            logRadio("ATC CENTER", `${target.id} 조종사 레이더 추적 개시.`);
-        }
-
-        window.clearTrackedAircraft = function() {
-            trackedUserId = null;
-            document.getElementById('atcSearchInput').value = '';
-            document.getElementById('trackedCallsign').innerText = '대상 항공기 미선택';
-            document.getElementById('trackedSquawk').innerText = 'SQK: ----';
-            document.getElementById('trackedDetailInfo').innerHTML = '<p>콜사인을 입력하여 관제 명령을 직접 입력하십시오.</p>';
-            document.getElementById('atcCommandSection').classList.add('opacity-50', 'pointer-events-none');
-        };
-
-        function findAtcTargetByCallsign(callsign) {
-            const wanted = normalizeAtcChannel(callsign).replace(/\s+/g, '');
-            let found = null;
-            remotePlayers.forEach((player, uid) => {
-                if (!found && canAtcControlPlayer(player) && String(player.id || '').trim().toUpperCase() === wanted) {
-                    found = { uid, player };
-                }
-            });
-            return found;
-        }
-
-        function setAtcCommandStatus(message, isError = false) {
-            const el = document.getElementById('atcCommandStatus');
-            if (!el) return;
-            el.textContent = message;
-            el.className = `text-[10px] min-h-[16px] ${isError ? 'text-red-400' : 'text-emerald-400'}`;
-        }
-
-        window.executeAtcTextCommand = async function() {
-            if (myRole !== 'ATC') return;
-            const input = document.getElementById('atcCommandInput');
-            const raw = String(input?.value || '').trim();
-            if (!raw) return;
-
-            const firstSpace = raw.search(/\s/);
-            if (firstSpace < 1) {
-                setAtcCommandStatus('형식: KAL101 고도 20000', true);
-                return;
-            }
-
-            const callsign = raw.slice(0, firstSpace).trim().toUpperCase();
-            const command = raw.slice(firstSpace).trim();
-            const targetInfo = findAtcTargetByCallsign(callsign);
-            if (!targetInfo) {
-                setAtcCommandStatus(`같은 통신 ID의 ${callsign} 항공기를 찾을 수 없습니다.`, true);
-                return;
-            }
-
-            const { uid, player: target } = targetInfo;
-            trackedUserId = uid;
-            selectTrackedPilot(uid);
-
-            try {
-                let match;
-
-                match = command.match(/^고도\s*([0-9,]+)\s*(?:FT)?$/i);
-                if (match) {
-                    const val = Number(match[1].replace(/,/g, ''));
-                    if (!Number.isFinite(val) || val < 0 || val > 60000) throw new Error('고도는 0~60,000 FT 사이여야 합니다.');
-                    await setDoc(
-                        doc(db, 'servers', serverId, 'players', uid),
-                        {
-                            atcCommand: {
-                                issuedAt: Date.now(),
-                                patch: { alt: val, targetAlt: val }
-                            },
-                            lastUpdated: Date.now()
-                        },
-                        { merge: true }
-                    );
-                    target.alt = val;
-                    target.targetAlt = val;
-                    remotePlayers.set(uid, target);
-                    updatePlayerMarkerTelemetryImmediate(uid, target);
-                    renderAllPlayers(performance.now());
-                    setAtcCommandStatus(`${callsign} 고도 ${val.toLocaleString()} FT 설정 완료.`);
-                } else if ((match = command.match(/^기수\s*(\d{1,3})(?:도)?$/i))) {
-                    const heading = normalizeHeading(Number(match[1]));
-                    target.targetHeading = heading;
-                    target.isHolding = false;
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcCommand: { issuedAt: Date.now(), patch: { targetHeading: heading, isHolding: false } }, lastUpdated: Date.now() }, { merge: true });
-                    setAtcCommandStatus(`${callsign} 기수 ${Math.round(heading)}° 지시 완료.`);
-                } else if (/^대기\s*해제$/i.test(command)) {
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcCommand: { issuedAt: Date.now(), patch: { isHolding: false } }, lastUpdated: Date.now() }, { merge: true });
-                    target.isHolding = false;
-                    setAtcCommandStatus(`${callsign} 대기 해제 완료.`);
-                } else if (/^대기(?:\s*선회)?$/i.test(command)) {
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcCommand: { issuedAt: Date.now(), patch: { isHolding: true } }, lastUpdated: Date.now() }, { merge: true });
-                    target.isHolding = true;
-                    setAtcCommandStatus(`${callsign} 현 위치 대기 지시 완료.`);
-                } else if ((match = command.match(/^직항\s+(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/))) {
-                    const lat = Number(match[1]);
-                    const lng = Number(match[2]);
-                    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) throw new Error('좌표가 올바르지 않습니다. 예: 37.50, 126.44');
-                    const wpt = { lat, lng: normalizeLongitude(lng), name: 'ATC_WPT' };
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcRouteCommand: { issuedAt: Date.now(), waypoints: [wpt], isHolding: false }, lastUpdated: Date.now() }, { merge: true });
-                    target.waypoints = [wpt]; target.isHolding = false; remotePlayers.set(uid, target);
-                    setAtcCommandStatus(`${callsign} 직항 목적지 ${lat.toFixed(2)}, ${normalizeLongitude(lng).toFixed(2)} 지정 완료.`);
-                } else if (/^비상\s*승인$/i.test(command)) {
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcCommand: { issuedAt: Date.now(), patch: { isEmergency: true, squawk: '7700' } }, lastUpdated: Date.now() }, { merge: true });
-                    target.isEmergency = true; target.squawk = '7700';
-                    setAtcCommandStatus(`${callsign} 비상 상태를 승인했습니다.`);
-                } else if (/^비상\s*해제$/i.test(command)) {
-                    await setDoc(doc(db, 'servers', serverId, 'players', uid), { atcCommand: { issuedAt: Date.now(), patch: { isEmergency: false, squawk: '7000' } }, lastUpdated: Date.now() }, { merge: true });
-                    target.isEmergency = false; target.squawk = '7000';
-                    setAtcCommandStatus(`${callsign} 비상 상태를 해제했습니다.`);
-                } else {
-                    throw new Error('알 수 없는 명령입니다. 가이드의 한국어 형식을 사용하세요.');
-                }
-
-                renderAllPlayers(performance.now());
-                if (input) { input.value = ''; input.focus(); }
-            } catch (error) {
-                console.error('ATC text command failed:', error);
-                setAtcCommandStatus(error?.message || '관제 명령 처리에 실패했습니다.', true);
-            }
-        };
-
-        window.toggleUserEmergency = function() {
-            myAircraft.isEmergency = !myAircraft.isEmergency;
-            myAircraft.squawk = myAircraft.isEmergency ? "7700" : "7000";
-            const btn = document.getElementById('btnEmergencyTrigger');
-            if (myAircraft.isEmergency) {
-                btn.className = "py-1.5 px-3 bg-red-600 text-white text-xs rounded-lg transition font-medium border border-red-400 animate-pulse flex items-center gap-1";
-                // 비상 버튼은 기체 상태만 변경하며 시스템 무전은 전송하지 않습니다.
-            } else {
-                btn.className = "py-1.5 px-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs rounded-lg transition font-medium border border-red-500/40 flex items-center gap-1";
-                // 비상 해제도 시스템 무전을 전송하지 않습니다.
-            }
-            pushMyStateToFirestore();
-        };
-
-        window.clearUserWaypoints = function() {
-            myAircraft.waypoints = [];
-            document.getElementById('userNextWpt').innerText = "DIRECT HEADING";
-            drawMyWaypoints();
-        };
-
-        function updatePlayersUIList() {
-            const listEl = document.getElementById('playersList');
-            const totalCount = remotePlayers.size + 1;
-            document.getElementById('playerCount').innerText = totalCount;
-            document.getElementById('onlineCount').innerText = totalCount;
-            listEl.innerHTML = '';
-
-            // Render My Entry
-            const myDiv = document.createElement('div');
-            myDiv.className = 'p-1.5 rounded flex items-center justify-between bg-cyan-950/60 border border-cyan-500/30 text-cyan-200 font-mono text-xs';
-            myDiv.innerHTML = `
-                <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle text-[8px] text-emerald-400"></i>
-                    <span class="font-bold">${myCallsign} (나)</span>
-                </div>
-                <span class="text-[10px] text-gray-400">[${myRole}] ${myAircraftType === 'FIGHTER' ? 'FTR' : ''} • ${atcChannel}</span>
-            `;
-            listEl.appendChild(myDiv);
-
-            // ATC는 현재 통신 ID와 같은 파일럿만 '관제 연결 대상'으로 표시합니다.
-            // 레이더에는 다른 ID의 항공기도 보이지만, 관제 명령/추적은 같은 ID끼리만 가능합니다.
-            let atcConnectedCount = 0;
-            remotePlayers.forEach((p, uid) => {
-                const isPilot = p.role === 'PILOT';
-                if (myRole === 'ATC' && !canAtcControlPlayer(p)) return;
-                if (myRole === 'ATC' && isPilot) atcConnectedCount++;
-
-                const item = document.createElement('div');
-                item.className = `p-1.5 rounded flex items-center justify-between cursor-pointer border transition ${uid === trackedUserId ? 'bg-amber-950/80 border-amber-400 text-amber-200' : 'bg-gray-900/40 border-gray-800/80 hover:bg-gray-800/60 text-gray-300'}`;
-                item.onclick = () => {
-                    if (myRole === 'ATC' && canAtcControlPlayer(p)) {
-                        selectTrackedPilot(uid);
-                    } else if (myRole === 'PILOT' && isCombatAircraftType(myAircraftType) && p.role === 'PILOT' && uid !== myUserId) {
-                        selectCombatTarget(uid);
-                    }
-                };
-
-                item.innerHTML = `
-                    <div class="flex items-center gap-1.5">
-                        <i class="fa-solid ${p.role === 'ATC' ? 'fa-headset text-amber-400' : 'fa-plane text-cyan-400'} text-[10px]"></i>
-                        <span class="font-bold">${p.id}</span>
-                    </div>
-                    <div class="text-[10px] text-gray-400">${p.role === 'PILOT' ? `ALT ${Math.round(p.alt || 0).toLocaleString()} FT • ${p.aircraftType === 'FIGHTER' ? 'FTR' : p.aircraftType === 'HELICOPTER' ? 'HELI' : p.aircraftType === 'TERRORIST' ? 'TERR' : 'FL' + Math.round((p.alt || 0)/100)}` : 'ATC'} • COMM ${p.atcChannel || '---'}</div>
-                `;
-                listEl.appendChild(item);
-            });
-
-            if (myRole === 'ATC' && atcConnectedCount === 0) {
-                const empty = document.createElement('div');
-                empty.className = 'p-2 rounded bg-gray-950/60 border border-gray-800 text-[10px] text-gray-500 text-center';
-                empty.innerText = `통신 ID ${atcChannel}에 연결된 파일럿이 없습니다.`;
-                listEl.appendChild(empty);
-            }
-        }
-
-        function appendRadioMessage(sender, text, timestamp) {
-            const logBox = document.getElementById('atcRadioLog');
-            const now = new Date(timestamp || Date.now());
-            const timeStr = now.toTimeString().split(' ')[0];
-            const msgDiv = document.createElement('div');
-            msgDiv.className = "border-b border-gray-900/60 pb-1 text-[11px] leading-tight";
-            msgDiv.innerHTML = `<span class="text-gray-500">[${timeStr}]</span> <span class="font-bold text-cyan-400">${sender}:</span> <span class="text-gray-200">${text}</span>`;
-            logBox.appendChild(msgDiv);
-        }
-
-        function isConversationRadioMessage(sender, text) {
-            const value = String(text || '').trim();
-            const blocked = ['전투기 표적 지정', '공격 실패:', '[전투]', '통신 ID가', '의 통신 ID가', '착륙 완료.', '비행 재개.', '레이더 추적 개시', '관제 지시:'];
-
-            // 고도 변경/설정 메시지는 통신망에 기록하거나 표시하지 않습니다.
-            // 이미 Firestore에 저장된 과거 메시지도 화면에서는 숨깁니다.
-            const altitudeSystemMessage =
-                /고도\s*(?:변경|설정|지시)[:：]?/.test(value)
-                || /고도\s*[0-9,]+\s*FT\s*(?:설정|변경)/.test(value)
-                || /(?:상승|하강)\s*(?:하여|해서)?\s*고도/.test(value);
-
-            if (altitudeSystemMessage) return false;
-            return !blocked.some(prefix => value.includes(prefix));
-        }
-
-        window.sendRadioMessage = async function() {
-            const input = document.getElementById('radioMessageInput');
-            const text = String(input?.value || '').trim();
-            if (!text) return;
-            if (!auth?.currentUser || !db || !serverId) {
-                alert('먼저 멀티플레이어 공역에 접속해 주세요.');
-                return;
-            }
-            if (text.length > 200) return;
-            await logRadio(myCallsign, text);
-            if (input) input.value = '';
-            if (input) input.focus();
-        };
-
-        async function logRadio(sender, text) {
-            if (!isConversationRadioMessage(sender, text)) return;
-            if (!db || !auth?.currentUser || !serverId) {
-                appendRadioMessage(sender, text, Date.now());
-                return;
-            }
-
-            try {
-                await setDoc(doc(collection(db, 'servers', serverId, 'radio')), { uid: auth.currentUser.uid, sender, text, channel: normalizeAtcChannel(atcChannel), timestamp: Date.now() });
-            } catch (e) {
-                appendRadioMessage(sender, text, Date.now());
-            }
-        }
-
-        function selectCombatTarget(uid) {
-            const target = remotePlayers.get(uid);
-            if (!target) return;
-            combatTargetUserId = uid;
-            document.getElementById('combatTargetName').innerText = target.id;
-            document.getElementById('combatTargetInfo').classList.remove('hidden');
-            logRadio(myCallsign, `전투기 표적 지정: ${target.id}`);
-        }
-
-        window.changeAtcChannel = async function() {
-            if (!auth || !auth.currentUser) {
-                alert('먼저 멀티플레이어 공역에 접속해 주세요.');
-                return;
-            }
-
-            const newChannel = prompt(`현재 통신 ID: ${atcChannel}\n\n변경할 통신 ID를 입력하세요.`, atcChannel);
-            if (newChannel === null) return;
-
-            const normalized = normalizeAtcChannel(newChannel);
-            if (!normalized) {
-                alert('통신 ID를 입력해 주세요.');
-                return;
-            }
-            if (normalized.length > 12) {
-                alert('통신 ID는 12자 이내로 입력해 주세요.');
-                return;
-            }
-            if (normalized === atcChannel) return;
-
-            const oldChannel = atcChannel;
-            atcChannel = normalized;
-            myAircraft.atcChannel = atcChannel;
-
-            // 통신 ID가 바뀌면 기존 관제 연결을 끊습니다.
-            if (trackedUserId) {
-                const tracked = remotePlayers.get(trackedUserId);
-                if (!tracked || !isSameAtcChannel(tracked)) {
-                    clearTrackedAircraft();
-                }
-            }
-
-            document.getElementById('channelDisplay').innerText = atcChannel;
-            const logBox = document.getElementById('atcRadioLog');
-            logBox.innerHTML = '';
-
-            // 현재 기체의 통신 ID를 즉시 서버에 반영합니다.
-            await pushMyStateToFirestore();
-            await logRadio('SYSTEM', `${myCallsign}의 통신 ID가 ${oldChannel} → ${atcChannel}(으)로 변경되었습니다.`);
-        };
-
-        window.toggleLanding = function() {
-            if (myRole !== 'PILOT' || myAircraft.gameOver) return;
-
-            if (!myAircraft.isLanded) {
-                myAircraft.isLanded = true;
-                myAircraft.speed = 0;
-                myAircraft.targetSpeed = 0;
-                myAircraft.isHolding = false;
-                if (myAircraft.requiresEmergencyLanding) {
-                    myAircraft.emergencyLanded = true;
-                    myAircraft.requiresEmergencyLanding = false;
-                    myAircraft.isEmergency = false;
-                    myAircraft.squawk = '7000';
-                }
-                document.getElementById('btnLanding').innerHTML = '<i class="fa-solid fa-plane-departure mr-1"></i> 이륙 / 재개';
-            } else {
-                myAircraft.isLanded = false;
-                myAircraft.speed = myAircraftType === 'HELICOPTER' ? helicopterTargetSpeed : getCruiseSpeedForAircraft(myAircraftType);
-                myAircraft.targetSpeed = myAircraft.speed;
-                syncHelicopterSpeedControl();
-                myAircraft.emergencyLanded = false;
-                myAircraft.isEmergency = false;
-                document.getElementById('btnLanding').innerHTML = '<i class="fa-solid fa-plane-arrival mr-1"></i> 착륙 / 정지';
-            }
-            updateCombatStatusUI();
-            pushMyStateToFirestore();
-        };
-
-        window.attackTarget = async function() {
-            if (myRole !== 'PILOT' || !isCombatAircraftType(myAircraftType) || !combatTargetUserId || myAircraft.isLanded || myAircraft.gameOver || myAircraft.isDisabled) return;
-            const target = remotePlayers.get(combatTargetUserId);
-            if (!target || target.role !== 'PILOT') return;
-
-            const distance = getDistanceNm(myAircraft.lat, myAircraft.lng, target.lat, target.lng);
-            const range = ATTACK_RANGES_NM[myAircraftType] || 50;
-            if (distance > range) {
-                logRadio(myCallsign, `공격 실패: ${target.id}와의 거리가 ${distance.toFixed(1)} NM로 사거리(${range} NM)를 초과합니다.`);
-                return;
-            }
-
-            const hitAt = Date.now();
-            // 1회 피격 시: GAME OVER 또는 강제 비상착륙 중 하나
-            const outcome = Math.random() < 0.5 ? 'GAMEOVER' : 'EMERGENCY';
-            const patch = outcome === 'GAMEOVER'
-                ? {
-                    isDisabled: true,
-                    gameOver: true,
-                    speed: 0,
-                    targetSpeed: 0,
-                    isEmergency: false,
-                    requiresEmergencyLanding: false,
-                    lastHitBy: myCallsign,
-                    lastHitAt: hitAt,
-                    damageOutcome: 'GAMEOVER'
-                }
-                : {
-                    isDisabled: false,
-                    gameOver: false,
-                    isEmergency: true,
-                    squawk: '7700',
-                    requiresEmergencyLanding: true,
-                    emergencyLanded: false,
-                    isHolding: false,
-                    waypoints: [],
-                    speed: Math.max(8000, Math.round((Number(target.speed) || getCruiseSpeedForAircraft(target.aircraftType)) * 0.45)),
-                    targetSpeed: Math.max(8000, Math.round((Number(target.speed) || getCruiseSpeedForAircraft(target.aircraftType)) * 0.45)),
-                    lastHitBy: myCallsign,
-                    lastHitAt: hitAt,
-                    damageOutcome: 'EMERGENCY'
-                };
-
-            try {
-                await setDoc(
-                    doc(db, 'servers', serverId, 'players', combatTargetUserId),
-                    { atcCommand: { issuedAt: hitAt, patch } },
-                    { merge: true }
-                );
-                logRadio(myCallsign, `${target.id} 공격 성공.`);
-            } catch (e) {
-                console.error('Attack failed:', e);
-                alert('공격 처리에 실패했습니다. Firebase 연결을 확인해 주세요.');
-            }
-        };
-
-        function updateCombatStatusUI() {
-            const banner = document.getElementById('combatStatusBanner');
-            const btn = document.getElementById('btnLanding');
-            if (!banner) return;
-
-            const key = [myAircraft.gameOver, myAircraft.isDisabled, myAircraft.requiresEmergencyLanding, myAircraft.isLanded, myAircraft.emergencyLanded, myAircraft.lastHitBy].join('|');
-            if (key === lastCombatStatusKey) return;
-            lastCombatStatusKey = key;
-
-            banner.classList.add('hidden');
-            const gameOverOverlay = document.getElementById('gameOverOverlay');
-            if (myAircraft.gameOver || myAircraft.isDisabled) {
-                banner.className = 'text-xs rounded-lg border p-2 bg-red-950/80 border-red-500/50 text-red-200';
-                banner.innerHTML = '💥 <b>GAME OVER</b><br>피격으로 비행이 종료되었습니다.';
-                banner.classList.remove('hidden');
-                if (btn) btn.disabled = true;
-                if (gameOverOverlay) {
-                    gameOverOverlay.classList.remove('hidden');
-                    gameOverOverlay.classList.add('flex');
-                    const reason = document.getElementById('gameOverReason');
-                    if (reason) reason.innerText = `${myAircraft.lastHitBy || '다른 플레이어'}의 공격을 받아 비행이 종료되었습니다.`;
-                }
-                return;
-            }
-
-            if (gameOverOverlay) {
-                gameOverOverlay.classList.add('hidden');
-                gameOverOverlay.classList.remove('flex');
-            }
-
-            if (myAircraft.requiresEmergencyLanding) {
-                banner.className = 'text-xs rounded-lg border p-2 bg-amber-950/80 border-amber-500/50 text-amber-200';
-                banner.innerHTML = `⚠️ <b>비상착륙 필요</b><br>${myAircraft.lastHitBy || '알 수 없음'}의 공격으로 손상되었습니다. <b>착륙한 뒤에만 재이륙</b>할 수 있습니다.`;
-                banner.classList.remove('hidden');
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fa-solid fa-plane-arrival mr-1"></i> 비상착륙';
-                }
-                return;
-            }
-
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = myAircraft.isLanded
-                    ? '<i class="fa-solid fa-plane-departure mr-1"></i> 이륙 / 재개'
-                    : '<i class="fa-solid fa-plane-arrival mr-1"></i> 착륙 / 정지';
-            }
-        }
-
-        function updatePilotAltitudeUI() {
-            const alt = Math.round(Number(myAircraft.alt) || 0);
-            const targetAlt = Math.round(Number(myAircraft.targetAlt) || alt);
-            const input = document.getElementById('pilotAltInput');
-            const targetLabel = document.getElementById('pilotTargetAltVal');
-            const currentLabel = document.getElementById('userAltVal');
-            if (input) input.value = targetAlt;
-            if (targetLabel) targetLabel.innerText = `목표 ${targetAlt.toLocaleString()} FT`;
-            if (currentLabel) currentLabel.innerText = `${alt.toLocaleString()} FT`;
-        }
-
-        window.adjustPilotAltitude = function(delta) {
-            if (myRole !== 'PILOT') return;
-            const next = Math.max(0, Math.min(60000, Math.round((myAircraft.targetAlt + delta) / 500) * 500));
-            myAircraft.targetAlt = next;
-            myAircraft.alt = next;
-            updatePilotAltitudeUI();
-            updatePlayerMarkerTelemetryImmediate(myUserId, myAircraft);
-            renderAllPlayers(performance.now());
-            pushMyStateToFirestore();
-        };
-
-        window.setPilotAltitude = function() {
-            if (myRole !== 'PILOT') return;
-            const input = Number(document.getElementById('pilotAltInput').value);
-            if (!Number.isFinite(input) || input < 0 || input > 60000) {
-                alert('고도는 0~60,000 FT 사이로 입력하세요.');
-                return;
-            }
-            const next = Math.round(input / 100) * 100;
-            myAircraft.targetAlt = next;
-            myAircraft.alt = next;
-            updatePilotAltitudeUI();
-            updatePlayerMarkerTelemetryImmediate(myUserId, myAircraft);
-            renderAllPlayers(performance.now());
-            pushMyStateToFirestore();
-        };
-
-
-
-        function isMobileLayout() {
-            return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-        }
-
-        window.toggleMobilePanel = function(panel) {
-            const main = document.getElementById('mainControlAside');
-            const comms = document.getElementById('commsAside');
-            const mainBtn = document.getElementById('mobilePanelBtn');
-            const commsBtn = document.getElementById('mobileCommsBtn');
-            if (!main || !comms) return;
-
-            if (!isMobileLayout()) {
-                main.classList.remove('mobile-panel-hidden');
-                comms.classList.remove('mobile-panel-hidden');
-                return;
-            }
-
-            if (panel === 'comms') {
-                main.classList.add('mobile-panel-hidden');
-                comms.classList.remove('mobile-panel-hidden');
-                mainBtn?.classList.remove('active');
-                commsBtn?.classList.add('active');
-            } else {
-                comms.classList.add('mobile-panel-hidden');
-                main.classList.remove('mobile-panel-hidden');
-                commsBtn?.classList.remove('active');
-                mainBtn?.classList.add('active');
-            }
-        };
-
-        function syncMobilePanelState() {
-            if (!isMobileLayout()) {
-                document.getElementById('mainControlAside')?.classList.remove('mobile-panel-hidden');
-                document.getElementById('commsAside')?.classList.remove('mobile-panel-hidden');
-                return;
-            }
-            // 모바일에서는 내 화면을 기본으로 보여줍니다.
-            toggleMobilePanel('main');
-        }
-
-        window.addEventListener('resize', syncMobilePanelState);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(syncMobilePanelState, 150);
-        });
-        setTimeout(syncMobilePanelState, 0);
-
-        window.toggleModal = function(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.toggle('hidden');
-        };
-
-        function getDistanceNm(lat1, lon1, lat2, lon2) {
-            const R = 3440.065;
-            const dLat = (Number(lat2) - Number(lat1)) * Math.PI / 180;
-            const deltaLonDeg = ((((Number(lon2) - Number(lon1) + 180) % 360) + 360) % 360) - 180;
-            const dLon = deltaLonDeg * Math.PI / 180;
-            const phi1 = Number(lat1) * Math.PI / 180;
-            const phi2 = Number(lat2) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(phi1) * Math.cos(phi2) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(Math.min(1, a)), Math.sqrt(Math.max(0, 1 - a)));
-            return R * c;
-        }
-
-        function getBearing(lat1, lon1, lat2, lon2) {
-            const phi1 = Number(lat1) * Math.PI / 180;
-            const phi2 = Number(lat2) * Math.PI / 180;
-            const deltaLambda = ((((Number(lon2) - Number(lon1) + 180) % 360) + 360) % 360 - 180) * Math.PI / 180;
-
-            const y = Math.sin(deltaLambda) * Math.cos(phi2);
-            const x = Math.cos(phi1) * Math.sin(phi2) -
-                      Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
-            return normalizeHeading(Math.atan2(y, x) * 180 / Math.PI);
-        }
-    </script>
+  </section>
+  <section class="card"><h3>📜 기보</h3><button id="kiboOpenBtn" class="secondary" style="width:100%">기보 읽기 (붙여 넣어 판 보기)</button></section>
+</main>
+<main id="gameView" class="game hidden" data-me="red">
+  <div id="statusbar" class="statusbar"><div><div id="turnText" class="turn">먼저 방을 연결하세요.</div><div id="notice" class="notice"></div></div><span id="turnBadge" class="turn-badge"><span class="mini-dot"></span><span></span></span><span id="checkChip" class="check-chip hidden">⚠ 장군!</span><button id="resultBtn" class="small primary hidden">결과 보기</button><span id="moveCounter" class="move-counter">수 0</span></div>
+  <div class="table">
+    <div id="blueLabel" class="side-label blue"><div class="avatar">漢</div><div class="info"><span class="name">한</span><span class="captured">점수</span></div><span class="clk" id="blueClk"></span></div>
+    <div class="board-wrap"><div id="board" class="board"><div class="board-grid" id="grid"><svg class="palace-lines" viewBox="0 0 8 9" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="0" x2="8" y2="0"/><line x1="0" y1="1" x2="8" y2="1"/><line x1="0" y1="2" x2="8" y2="2"/><line x1="0" y1="3" x2="8" y2="3"/><line x1="0" y1="4" x2="8" y2="4"/><line x1="0" y1="5" x2="8" y2="5"/><line x1="0" y1="6" x2="8" y2="6"/><line x1="0" y1="7" x2="8" y2="7"/><line x1="0" y1="8" x2="8" y2="8"/><line x1="0" y1="9" x2="8" y2="9"/><line x1="0" y1="0" x2="0" y2="9"/><line x1="1" y1="0" x2="1" y2="9"/><line x1="2" y1="0" x2="2" y2="9"/><line x1="3" y1="0" x2="3" y2="9"/><line x1="4" y1="0" x2="4" y2="9"/><line x1="5" y1="0" x2="5" y2="9"/><line x1="6" y1="0" x2="6" y2="9"/><line x1="7" y1="0" x2="7" y2="9"/><line x1="8" y1="0" x2="8" y2="9"/><line x1="3" y1="0" x2="5" y2="2"/><line x1="5" y1="0" x2="3" y2="2"/><line x1="3" y1="7" x2="5" y2="9"/><line x1="5" y1="7" x2="3" y2="9"/></svg></div><div id="checkBanner" class="check-banner"><b>장군!</b><span></span></div></div></div>
+    <div id="redLabel" class="side-label red"><div class="avatar">楚</div><div class="info"><span class="name">초</span><span class="captured">점수</span></div><span class="clk" id="redClk"></span></div>
+  </div>
+  <div class="actionbar"><button id="passBtn" disabled>한수쉼</button><button id="resignBtn" class="danger" disabled>기권</button><button id="rematchBtn" disabled>재대국</button><button id="logBtn">기록</button><button id="resetUiBtn" class="ghost wide">로비로 나가기</button></div>
+  <div id="rematchStatus" class="muted" style="text-align:center"></div>
+</main>
+</div>
+<div id="logModal" class="modal hidden"><div class="modal-card">
+  <h2>📜 대국 기록</h2><textarea id="kiboText" class="codebox" readonly style="min-height:220px"></textarea>
+  <div class="row" style="margin-top:12px"><button id="kiboCopyBtn" class="secondary" style="flex:1">기보 복사</button><button id="kiboFromLogBtn" class="secondary" style="flex:1">기보 읽기</button></div>
+  <button id="closeLog" class="primary" style="width:100%;margin-top:8px">닫기</button>
+</div></div>
+<div id="kiboModal" class="modal hidden"><div class="modal-card">
+  <h2>📜 기보 읽기</h2>
+  <textarea id="kiboInput" class="codebox" placeholder="기보를 붙여 넣으세요.&#10;예)&#10;1. 초 卒 9,4 → 9,5&#10;2. 한 兵 1,7 → 1,6"></textarea>
+  <div class="row" style="margin:8px 0"><label class="field" style="margin:0;flex:1">초 차림새<select id="kiboRedF" class="input"></select></label><label class="field" style="margin:0;flex:1">한 차림새<select id="kiboBlueF" class="input"></select></label></div>
+  <button id="kiboLoadBtn" class="primary" style="width:100%;margin:8px 0">기보 불러오기</button>
+  <div id="kiboError" class="kibo-err hidden"></div>
+  <div id="kiboViewer" class="hidden">
+    <div class="kibo-wrap"><div class="board"><div class="board-grid" id="kiboGrid"></div></div></div>
+    <div id="kiboForm" class="kibo-form"></div><div id="kiboInfo" class="kibo-info"></div>
+    <div class="kibo-ctrl"><button id="kFirst" aria-label="처음">⏮</button><button id="kPrev" aria-label="이전">◀</button><button id="kNext" aria-label="다음">▶</button><button id="kLast" aria-label="끝">⏭</button></div>
+    <input id="kiboSlider" class="kibo-slider" type="range" min="0" max="0" value="0">
+    <div class="capture-tray"><div class="captured-group"><div class="captured-title">초가 잡은 기물</div><div id="kiboCapRed" class="captured-pieces"></div></div><div class="captured-group"><div class="captured-title">한이 잡은 기물</div><div id="kiboCapBlue" class="captured-pieces"></div></div></div>
+  </div>
+  <button id="closeKibo" class="primary" style="width:100%;margin-top:8px">닫기</button>
+</div></div>
+<div id="resultOverlay" class="result-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive"><div id="resultCard" class="result-card">
+  <div id="resEmblem" class="res-emblem cho"><span id="resChar">楚</span></div>
+  <div id="resTitle" class="res-title"></div>
+  <div id="resSub" class="res-sub"></div>
+  <div id="resRematch" class="res-rematch"></div>
+  <div class="res-actions"><button id="resRematchBtn" class="primary">재대국</button><button id="resViewBtn" class="secondary">판 보기</button><button id="resLobbyBtn" class="ghost">로비로 나가기</button></div>
+</div></div>
+<script>
+'use strict';
+
+// =========================
+// WebRTC
+// =========================
+// 게임 서버는 없습니다. STUN은 연결 후보를 찾는 "보조" 역할입니다.
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+const $ = id => document.getElementById(id);
+const boardEl = $('board'), gridEl = $('grid');
+const turnText = $('turnText'), noticeEl = $('notice');
+const connDot = $('connDot'), connText = $('connText'), rolePill = $('rolePill'), sidePill = $('sidePill');
+const passBtn=$('passBtn'), nameInput=$('nameInput'), timeSel=$('timeSel'), byoSel=$('byoSel'), resignBtn = $('resignBtn'), rematchBtn = $('rematchBtn'), rematchStatus = $('rematchStatus');
+const turnBadge=$('turnBadge'), moveCounter=$('moveCounter'), redLabel=$('redLabel'), blueLabel=$('blueLabel');
+const signalArea = $('signalArea'), signalStep = $('signalStep'), signalInput = $('signalInput'), signalOutput = $('signalOutput');
+const createBtn = $('createBtn'), joinBtn = $('joinBtn'), signalApplyBtn = $('signalApplyBtn'), copySignalBtn = $('copySignalBtn');
+const formationSel = $('formationSel'), soloRedFormation = $('soloRedFormation'), soloBlueFormation = $('soloBlueFormation');
+const FORMATION_LABELS = {wonang:'원앙마', yanggwima:'양귀마', leftWonang:'좌원앙마', rightWonang:'우원앙마'};
+
+let role = null; // host | guest
+let side = null; // red | blue
+let pc = null;
+let dc = null;
+let heartbeatTimer = null;
+let lastPong = Date.now();
+let pendingSignalMode = null; // host-answer | guest-offer
+let pendingLocalCode = '';
+let selected = null;
+let state = null;
+let solo = false, unresp = false, timeLimitMs = 0, byoMs = 0, clockBase = Date.now();
+const SCORE={R:13,C:7,H:5,E:3,G:3,S:2,K:0};
+const online=()=>solo||(dc&&dc.readyState==='open');
+const getName=()=>nameInput.value.trim().slice(0,12)||'익명';
+const rawScore=(b,sd)=>scoreOf(b,sd)-(sd==='blue'?1.5:0); // 덤 제외 기물 점수
+const bikAllowed=b=>rawScore(b,'red')<=30&&rawScore(b,'blue')<=30;
+function scoreOf(b,sd){let t=sd==='blue'?1.5:0;for(const r of b)for(const q of r)if(q&&q.side===sd)t+=SCORE[q.type];return t}
+function showView(v){$('lobbyView').classList.toggle('hidden',v!=='lobby');$('gameView').classList.toggle('hidden',v!=='game');}
+function settleClock(sd){
+  const c=state.clock;
+  if(c&&c.limit){
+    const e=Date.now()-clockBase, m=c[sd], byo=c.byo||0;
+    if(byo&&e>m){ // 기본 시간을 넘긴 만큼 초읽기 소진 (경과한 초읽기 구간 수)
+      c.byoUsed=c.byoUsed||{red:0,blue:0};
+      c.byoUsed[sd]=Math.min(c.byoN||3,(c.byoUsed[sd]||0)+Math.floor((e-m)/byo));
+    }
+    c[sd]=Math.max(0,m-e);
+  }
+  clockBase=Date.now();
+}
+function clockInfo(sd){ // 기본 시간을 다 쓰면 한 수마다 초읽기가 주어진다
+  const c=state?.clock; if(!c||!c.limit) return null;
+  const m=c[sd], byo=c.byo||0, e=(state.status==='playing'&&state.turn===sd)?Date.now()-clockBase:0;
+  if(!byo) return {ms:Math.max(0,m-e),byo:false};
+  if(m>0&&e<=m) return {ms:m-e,byo:false};
+  const N=c.byoN||3, used0=(c.byoUsed&&c.byoUsed[sd])||0, over=e-m, used=used0+Math.floor(over/byo), left=N-used;
+  if(left<=0) return {ms:0,byo:true,left:0};
+  return {ms:byo-(over%byo),byo:true,left};
+}
+function fmt(ms){if(ms==null)return '∞';const t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
+function renderClock(){
+  if(!state)return;
+  for(const sd of ['red','blue']){
+    const i=clockInfo(sd),el=$(sd+'Clk');
+    el.textContent=!i?'∞':i.byo?'초읽기 '+Math.ceil(i.ms/1000)+' ('+i.left+')':fmt(i.ms);
+    el.classList.toggle('byo',!!i&&i.byo); el.classList.toggle('low',!!i&&(i.byo?i.ms<=10000:!state.clock.byo&&i.ms<30000));
+  }
+}
+setInterval(()=>{
+  if(!state)return; renderClock();
+  if(role==='host'&&state.status==='playing'&&online()&&state.clock.limit&&clockInfo(state.turn).ms<=0){
+    const l=state.turn; settleClock(l); state.status='finished'; state.winner=l==='red'?'blue':'red'; state.reason='시간 초과'; state.check=null;
+    broadcast(); drawBoard(); setNotice(`${l==='red'?'초':'한'} 시간 초과 — ${state.winner==='red'?'초':'한'} 승리`);
+  }
+},500);
+
+const PIECES = {
+  red:  { K:'楚', G:'士', R:'車', C:'包', H:'馬', E:'象', S:'卒' },
+  blue: { K:'漢', G:'士', R:'車', C:'包', H:'馬', E:'象', S:'兵' }
+};
+
+const HOME_Y = { red: 9, blue: 0 };
+const DIR = { red: -1, blue: 1 };
+
+function log(msg, cls='') {
+  // 화면 로그는 제거됨 (기보 하나만 표시)
+}
+function setConnection(ok, text) {
+  connDot.className = 'dot ' + (ok ? 'ok' : 'bad');
+  connText.textContent = text;
+}
+function setRole(r, s) {
+  role = r; side = s;
+  rolePill.textContent = '역할: ' + (r==='host'?'방장':'참가자');
+  sidePill.textContent = '진영: ' + (s==='red'?'초':'한');
+  $('gameView').dataset.me=s; buildGrid(); // 한(참가자)은 판을 뒤집어 내 말이 아래에 오도록
+  if(state) drawBoard();
+}
+function emptyBoard(redFormation='wonang', blueFormation='wonang') {
+  const b = Array.from({length:10},()=>Array(9).fill(null));
+  const put = (x,y,side,type)=>b[y][x]={side,type};
+
+  // 차림새:
+  // 원앙마   = 마상상마
+  // 좌원앙마 = 마상마상
+  // 우원앙마 = 상마상마
+  // 양귀마   = 상마마상
+  // 배열의 x=1,2,6,7 위치가 각각 위 네 글자의 순서가 됩니다. (각 진영 본인 기준, 왼쪽→오른쪽)
+  // 한은 맞은편에서 보므로 좌우를 뒤집어 놓습니다.
+  const formationBack = {
+    wonang:      ['R','H','E','G',null,'G','E','H','R'],
+    leftWonang:  ['R','H','E','G',null,'G','H','E','R'],
+    rightWonang: ['R','E','H','G',null,'G','E','H','R'],
+    yanggwima:   ['R','E','H','G',null,'G','H','E','R']
+  };
+  const redBack = formationBack[redFormation] || formationBack.wonang;
+  const blueBack = (formationBack[blueFormation] || formationBack.wonang).slice().reverse();
+
+  blueBack.forEach((t,x)=>{ if(t) put(x,0,'blue',t); });
+  put(4,1,'blue','K');
+  [1,7].forEach(x=>put(x,2,'blue','C'));
+  [0,2,4,6,8].forEach(x=>put(x,3,'blue','S'));
+
+  [0,2,4,6,8].forEach(x=>put(x,6,'red','S'));
+  [1,7].forEach(x=>put(x,7,'red','C'));
+  put(4,8,'red','K');
+  redBack.forEach((t,x)=>{ if(t) put(x,9,'red',t); });
+
+  return b;
+}
+function initialState(redFormation=formationSel?.value||'wonang', blueFormation='wonang'){
+  return {board:emptyBoard(redFormation,blueFormation),turn:'red',status:'playing',winner:null,check:null,lastMove:null,moveNo:0,history:[],captured:{red:[],blue:[]},passes:0,bikjang:false,reason:'',formations:{red:redFormation,blue:blueFormation},names:{red:getName(),blue:'상대'},clock:{red:timeLimitMs,blue:timeLimitMs,byo:byoMs,byoN:3,byoUsed:{red:0,blue:0},limit:timeLimitMs+byoMs},rematch:{red:false,blue:false}};
+}
+function pieceLabel(p){return p?PIECES[p.side][p.type]:''}
+function capturedByColor(color){return state?.captured?.[color]||[];}
+function renderCaptured(el, pieces){
+  el.innerHTML='';
+  if(!pieces.length){const s=document.createElement('span');s.className='empty-capture';s.textContent='없음';el.appendChild(s);return;}
+  for(const p of pieces){const d=document.createElement('span');d.className='mini-piece '+p.side+' type-'+p.type;d.textContent=pieceLabel(p);d.title=pieceLabel(p);el.appendChild(d);}
+}
+function countCaptured(color){return capturedByColor(color).length;}
+
+
+let cells=[];
+function buildGrid(){
+  gridEl.querySelectorAll('.cell').forEach(c=>c.remove()); cells=new Array(90);
+  const flip=!solo&&side==='blue';
+  for(let y=0;y<10;y++) for(let x=0;x<9;x++){
+    const cell=document.createElement('div'); cell.className='cell';
+    cell.style.left=((flip?8-x:x)/8*100)+'%'; cell.style.top=((flip?9-y:y)/9*100)+'%';
+    cell.addEventListener('click',()=>onCellClick(x,y)); gridEl.appendChild(cell); cells[y*9+x]=cell;
+  }
+}
+function cellAt(x,y){return cells[y*9+x]}
+
+function deepCloneBoard(b){return b.map(r=>r.map(p=>p?{...p}:null));}
+function inBoard(x,y){return x>=0&&x<9&&y>=0&&y<10}
+function inPalace(side,x,y){return x>=3&&x<=5 && (side==='blue'?y>=0&&y<=2:y>=7&&y<=9)}
+function palaceOf(x,y){ if(x<3||x>5) return null; if(y<=2) return 'blue'; if(y>=7) return 'red'; return null; }
+function onDiag(x,y){ const p=palaceOf(x,y); return !!p && Math.abs(x-4)===Math.abs(y-(p==='blue'?1:8)); } // 궁성 네 모서리 + 중앙
+function diagLink(x1,y1,x2,y2){ const p=palaceOf(x1,y1); return !!p && p===palaceOf(x2,y2) && Math.abs(x2-x1)===1 && Math.abs(y2-y1)===1 && onDiag(x1,y1) && onDiag(x2,y2); }
+function diagStepInPalace(side,x1,y1,x2,y2){return palaceOf(x1,y1)===side&&diagLink(x1,y1,x2,y2);}
+function palaceRays(x,y){return [[1,1],[1,-1],[-1,1],[-1,-1]].filter(([dx,dy])=>diagLink(x,y,x+dx,y+dy));}
+function stepsOnLine(x1,y1,x2,y2){
+  const dx=Math.sign(x2-x1),dy=Math.sign(y2-y1); const n=Math.max(Math.abs(x2-x1),Math.abs(y2-y1));
+  const arr=[]; for(let i=1;i<n;i++) arr.push([x1+dx*i,y1+dy*i]); return arr;
+}
+function pathClear(b,x1,y1,x2,y2){return stepsOnLine(x1,y1,x2,y2).every(([x,y])=>!b[y][x]);}
+function countBetween(b,x1,y1,x2,y2){return stepsOnLine(x1,y1,x2,y2).filter(([x,y])=>!!b[y][x]).length}
+
+function pseudoMoves(b,x,y,ignoreTarget=false){
+  const p=b[y]?.[x]; if(!p) return [];
+  const out=[];
+  const push=(tx,ty,kind='normal')=>{if(inBoard(tx,ty)) out.push({x:tx,y:ty,kind})};
+  const side=p.side, dir=DIR[side], type=p.type;
+  if(type==='S'){
+    push(x,y+dir); push(x-1,y); push(x+1,y);
+    for(const dx of [-1,1]) if(diagLink(x,y,x+dx,y+dir)) push(x+dx,y+dir); // 궁성 대각선 전진
+  } else if(type==='K' || type==='G'){
+    const ds=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+    for(const [dx,dy] of ds){
+      const tx=x+dx,ty=y+dy;
+      if((dx===0||dy===0) ? inPalace(side,tx,ty) : diagStepInPalace(side,x,y,tx,ty)) push(tx,ty);
+    }
+  } else if(type==='R'){
+    for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      let tx=x+dx,ty=y+dy;
+      while(inBoard(tx,ty)){
+        push(tx,ty); if(b[ty][tx]) break; tx+=dx;ty+=dy;
+      }
+    }
+    for(const [dx,dy] of palaceRays(x,y)){
+      let tx=x+dx,ty=y+dy;
+      while(inBoard(tx,ty)){ push(tx,ty); if(b[ty][tx]||!diagLink(tx,ty,tx+dx,ty+dy)) break; tx+=dx;ty+=dy; }
+    }
+  } else if(type==='C'){
+    const rays=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0]];
+    for(const [dx,dy] of palaceRays(x,y)) rays.push([dx,dy,1]);
+    for(const [dx,dy,dg] of rays){
+      let tx=x+dx,ty=y+dy,seen=false;
+      while(inBoard(tx,ty)){
+        const q=b[ty][tx];
+        if(!seen){ if(q){ if(q.type==='C') break; seen=true; } }
+        else { if(q){ if(q.type!=='C') push(tx,ty,'capture'); break; } push(tx,ty); }
+        if(dg&&!diagLink(tx,ty,tx+dx,ty+dy)) break; // 대각선은 궁성 밖으로 못 나감
+        tx+=dx;ty+=dy;
+      }
+    }
+  } else if(type==='H'){
+    const patterns=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+    for(const [dx,dy] of patterns){
+      const adx=Math.abs(dx),ady=Math.abs(dy);
+      const bx=x+(adx===2?Math.sign(dx):0), by=y+(ady===2?Math.sign(dy):0);
+      // The first orthogonal leg is blocked.
+      if(!b[by]?.[bx]) push(x+dx,y+dy);
+    }
+  } else if(type==='E'){
+    const pats=[[2,3],[3,2],[-2,3],[-3,2],[2,-3],[3,-2],[-2,-3],[-3,-2]];
+    for(const [dx,dy] of pats){
+      const sx=Math.sign(dx),sy=Math.sign(dy), adx=Math.abs(dx),ady=Math.abs(dy);
+      let b1,b2;
+      if(adx===3){b1=[x+sx,y]; b2=[x+2*sx,y+sy];}
+      else {b1=[x,y+sy]; b2=[x+sx,y+2*sy];}
+      if(!b[b1[1]]?.[b1[0]] && !b[b2[1]]?.[b2[0]]) push(x+dx,y+dy);
+    }
+  }
+  return out.filter(m=>inBoard(m.x,m.y) && (ignoreTarget || !b[m.y][m.x] || b[m.y][m.x].side!==side));
+}
+
+function generalsFacing(b){
+  let rk=null,bk=null;
+  for(let y=0;y<10;y++) for(let x=0;x<9;x++){ const p=b[y][x]; if(!p||p.type!=='K') continue; if(p.side==='red') rk=[x,y]; else bk=[x,y]; }
+  if(!rk||!bk||rk[0]!==bk[0]) return false;
+  return pathClear(b,rk[0],rk[1],bk[0],bk[1]);
+}
+function isSquareAttacked(b,x,y,bySide){
+  for(let yy=0;yy<10;yy++) for(let xx=0;xx<9;xx++){
+    const p=b[yy][xx]; if(!p||p.side!==bySide) continue;
+    const moves=pseudoMoves(b,xx,yy,true);
+    if(moves.some(m=>m.x===x&&m.y===y)) return true;
+  }
+  return false;
+}
+function generalPos(b,side){for(let y=0;y<10;y++)for(let x=0;x<9;x++)if(b[y][x]?.side===side&&b[y][x].type==='K')return[x,y]; return null;}
+function inCheck(b,side){const g=generalPos(b,side); if(!g) return true; return isSquareAttacked(b,g[0],g[1],side==='red'?'blue':'red');}
+function applyMoveToBoard(b,fx,fy,tx,ty){const nb=deepCloneBoard(b); nb[ty][tx]=nb[fy][fx]; nb[fy][fx]=null; return nb;}
+function legalMovesFrom(b,x,y){
+  const p=b[y]?.[x]; if(!p) return [];
+  return pseudoMoves(b,x,y).filter(m=>{
+    const target=b[m.y][m.x]; if(target?.type==='K') return false; // checkmate is represented by no legal replies.
+    const nb=applyMoveToBoard(b,x,y,m.x,m.y);
+    return !inCheck(nb,p.side); // 30점 초과 상황에서도 빅장 상태 자체는 허용
+  });
+}
+function isLegalMove(b,fx,fy,tx,ty){return legalMovesFrom(b,fx,fy).some(m=>m.x===tx&&m.y===ty)}
+function hasAnyLegalMove(b,side){for(let y=0;y<10;y++)for(let x=0;x<9;x++){if(b[y][x]?.side===side && legalMovesFrom(b,x,y).length)return true;} return false;}
+function notationMove(p,fx,fy,tx,ty){return `${p.side==='red'?'초':'한'} ${PIECES[p.side][p.type]} ${fx+1},${10-fy} → ${tx+1},${10-ty}`}
+
+function drawBoard(){
+  cells.forEach(c=>{c.classList.remove('highlight','capture','last-from','last-to','bik','incheck');c.innerHTML='';});
+  if(!state){ turnBadge.classList.add('hidden'); moveCounter.textContent='수 0'; return; }
+  if(solo&&state.status==='playing') side=state.turn; // 혼자 두기: 차례인 쪽이 곧 내 진영
+  if(state.lastMove){
+    cellAt(state.lastMove.from.x,state.lastMove.from.y)?.classList.add('last-from');
+    cellAt(state.lastMove.to.x,state.lastMove.to.y)?.classList.add('last-to');
+  }
+  for(let y=0;y<10;y++) for(let x=0;x<9;x++){
+    const c=cellAt(x,y); if(!c) continue;
+    const p=state.board[y][x];
+    if(p){const d=document.createElement('div');d.className='piece '+(p.side==='red'?'red':'blue')+' type-'+p.type+(p.type==='K'?' general':'');if(selected&&selected.x===x&&selected.y===y)d.classList.add('sel');const label=PIECES[p.side][p.type];d.textContent=label;d.setAttribute('aria-label',p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label);d.title=p.type==='K'?(p.side==='red'?'초의 궁':'한의 궁'):label;c.appendChild(d);}
+  }
+  const bikOn=!!state.bikjang&&state.status==='playing'&&bikAllowed(state.board);
+  noticeEl.classList.toggle('alert',bikOn||(state.status==='playing'&&!!state.check));
+  if(bikOn) for(const c of ['red','blue']){const g=generalPos(state.board,c); if(g) cellAt(g[0],g[1])?.classList.add('bik');}
+  if(selected){for(const m of legalMovesFrom(state.board,selected.x,selected.y)){const c=cellAt(m.x,m.y);if(c)c.classList.add(state.board[m.y][m.x]?'capture':'highlight')}}
+  const turnSide=state.turn;
+  turnBadge.classList.remove('hidden'); turnBadge.querySelector('.mini-dot').className='mini-dot '+(turnSide==='red'?'mini-red':'mini-blue'); turnBadge.querySelector('span:last-child').textContent=(turnSide==='red'?'🔵 초 차례':'🔴 한 차례');
+  moveCounter.textContent='수 '+state.moveNo;
+  turnText.textContent = state.status==='playing' ? `${state.turn==='red'?'초':'한'} 차례${solo?'':side===state.turn?' — 내 차례!':' — 상대 차례'}` : (state.winner?`대국 종료 — ${state.winner==='red'?'초':'한'} 승리${state.reason?' ('+state.reason+')':''}`:'대국 종료');
+  const currentRed=side==='red'; const currentBlue=side==='blue'; redLabel.classList.toggle('active',state.status==='playing'&&turnSide==='red'); blueLabel.classList.toggle('active',state.status==='playing'&&turnSide==='blue');
+  redLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'red'); blueLabel.querySelector('.captured').textContent='점수 '+scoreOf(state.board,'blue')+' (덤 포함)';
+  redLabel.querySelector('.name').textContent='초 · '+(state.names?.red||''); blueLabel.querySelector('.name').textContent='한 · '+(state.names?.blue||''); renderClock();
+  $('kiboText').value=buildKibo(); // 복붙해서 기보 읽기에 그대로 넣을 수 있는 기록
+  passBtn.disabled=state.status!=='playing'||state.turn!==side||state.check===side||!online();
+  resignBtn.disabled=state.status!=='playing'||!online();
+  rematchBtn.disabled=state.status!=='finished'||!online();
+  updateCheckUI(); updateResultUI(); updateSound();
+  rematchStatus.textContent = state.status==='finished' ? `재대국: 초 ${state.rematch.red?'✅':'⬜'} · 한 ${state.rematch.blue?'✅':'⬜'}` : '';
+}
+function setNotice(t){noticeEl.textContent=t}
+
+function snapshot(){return JSON.stringify(state)}
+function send(obj){if(dc&&dc.readyState==='open') dc.send(JSON.stringify(obj));}
+function broadcast(){send({type:'STATE',state});}
+
+function endByScore(why){
+  const r=scoreOf(state.board,'red'),b=scoreOf(state.board,'blue');
+  state.status='finished'; state.winner=r>b?'red':'blue'; state.reason=`${why} · 계가 초 ${r} : 한 ${b}`; state.check=null;
+  setNotice(`${state.reason} — ${state.winner==='red'?'초':'한'} 승리`);
+}
+function hostApplyMove(from,to){
+  if(!state||state.status!=='playing') return false;
+  const p=state.board[from.y][from.x]; if(!p||p.side!==state.turn) return false;
+  if(!isLegalMove(state.board,from.x,from.y,to.x,to.y)) return false;
+  settleClock(state.turn); state.passes=0;
+  const captured=state.board[to.y][to.x] ? {...state.board[to.y][to.x]} : null;
+  const nb=applyMoveToBoard(state.board,from.x,from.y,to.x,to.y);
+  state.board=nb; state.lastMove={from,to}; state.moveNo++; state.turn=state.turn==='red'?'blue':'red';
+  if(captured) state.captured[p.side].push(captured);
+  const mover=p.side; const enemy=state.turn;
+  state.check=inCheck(state.board,enemy)?enemy:null;
+  const any=hasAnyLegalMove(state.board,enemy);
+  let resultTag='';
+  if(!any&&state.check){ state.status='finished'; state.winner=mover; state.reason='외통'; resultTag='외통'; setNotice(`${mover==='red'?'초':'한'}의 외통수!`); }
+  else if(state.check){ resultTag='장군'; setNotice(`${enemy==='red'?'초':'한'} 장군!`); }
+  else setNotice('');
+  const facing=generalsFacing(state.board); // 빅장(대궁): 상대가 다음 수에 해소하지 못하면 계가
+  if(state.status==='playing'){
+    if(facing&&state.bikjang&&bikAllowed(state.board)){ endByScore('빅장'); resultTag='빅장'; }
+    else if(facing){
+      resultTag+=' 빅장';
+      setNotice(bikAllowed(state.board)
+        ? `빅장! ${enemy==='red'?'초가':'한이'} 해소하지 않으면 계가로 종료됩니다.`
+        : '빅장 상태입니다. (양측 기물 점수가 30점을 초과하여 경기 종료 없이 계속됩니다.)');
+    }
+  }
+  state.bikjang=facing;
+  state.history.push({text:notationMove(p,from.x,from.y,to.x,to.y),captured,check:resultTag});
+  state.rematch={red:false,blue:false};
+  broadcast(); drawBoard();
+  log(notationMove(p,from.x,from.y,to.x,to.y));
+  return true;
+}
+
+function hostApplyPass(sd){
+  if(!state||state.status!=='playing'||state.turn!==sd||state.check===sd) return false;
+  settleClock(sd); state.passes++; state.moveNo++; state.turn=sd==='red'?'blue':'red'; state.lastMove=null; state.check=null;
+  state.history.push({text:`${sd==='red'?'초':'한'} 한수쉼`,captured:null,check:''});
+  const facing=generalsFacing(state.board);
+  if(state.passes>=2) endByScore('연속 한수쉼');
+  else if(facing&&state.bikjang&&bikAllowed(state.board)) endByScore('빅장');
+  else setNotice(facing
+    ? (bikAllowed(state.board)
+      ? '빅장 상태입니다. 해소하지 않으면 계가로 종료됩니다.'
+      : '빅장 상태입니다. (양측 기물 점수가 30점을 초과하여 경기 종료 없이 계속됩니다.)')
+    : `${sd==='red'?'초가':'한이'} 한수쉼했습니다.`);
+  state.bikjang=facing;
+  state.rematch={red:false,blue:false}; broadcast(); drawBoard(); return true;
+}
+function bikBlocked(f,t){
+  const b=state.board,p=b[f.y][f.x]; if(!p||!pseudoMoves(b,f.x,f.y).some(m=>m.x===t.x&&m.y===t.y)) return false;
+  const nb=applyMoveToBoard(b,f.x,f.y,t.x,t.y); return generalsFacing(nb)&&!bikAllowed(nb)&&!inCheck(nb,p.side);
+}
+function confirmBikjang(from,to){ // 빅장이 걸린 상태에서 해소하지 않는 수를 두려 할 때 확인
+  const nb=applyMoveToBoard(state.board,from.x,from.y,to.x,to.y);
+  if(!state.bikjang||!generalsFacing(nb)||!bikAllowed(nb)) return true;
+  return confirm('빅장 상태입니다.\n이 수로는 두 궁이 계속 마주 보게 되어 빅장이 성립하고, 계가(점수)로 대국이 끝납니다.\n\n그래도 두시겠어요?');
+}
+function localSelect(x,y){
+  if(!state||state.status!=='playing'||!side||!online()) return;
+  const p=state.board[y][x];
+  if(selected){
+    if(selected.x===x&&selected.y===y){selected=null;drawBoard();return;}
+    if(p&&p.side===side){selected={x,y};drawBoard();return;}
+    if(side!==state.turn){setNotice('지금은 상대 차례입니다.');return;}
+    if(!isLegalMove(state.board,selected.x,selected.y,x,y)){setNotice('그 수는 둘 수 없습니다.');return;}
+    if(!confirmBikjang(selected,{x,y})) return;
+    if(role==='host'){
+      if(hostApplyMove(selected,{x,y})) selected=null,drawBoard();
+      else setNotice('그 수는 둘 수 없습니다.');
+    }else{
+      if(isLegalMove(state.board,selected.x,selected.y,x,y)){
+        send({type:'MOVE',from:selected,to:{x,y}}); setNotice('상대에게 착수를 전송했습니다.'); selected=null;drawBoard();
+      }else setNotice('그 수는 둘 수 없습니다.');
+    }
+  }else if(p&&p.side===side&&side===state.turn){selected={x,y};drawBoard();}
+}
+function onCellClick(x,y){localSelect(x,y)}
+
+function resetClientState(){state=initialState();selected=null;drawBoard();}
+
+async function waitIceGathering(pc, timeout=8000){
+  if(pc.iceGatheringState==='complete') return;
+  await new Promise(resolve=>{
+    let done=false;
+    const finish=()=>{if(done)return;done=true;pc.removeEventListener('icegatheringstatechange',check);resolve()};
+    const check=()=>{if(pc.iceGatheringState==='complete')finish()};
+    pc.addEventListener('icegatheringstatechange',check); setTimeout(finish,timeout);
+  });
+}
+const b64u=u8=>{let s='';u8.forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const unb64u=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');t+='='.repeat((4-t.length%4)%4);return Uint8Array.from(atob(t),c=>c.charCodeAt(0))};
+async function pipe(u8,Stream){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new Stream('deflate-raw'))).arrayBuffer())}
+const grp=t=>t.match(/.{1,5}/g).join(' ');
+// ---- 초단축 코드: SDP에서 꼭 필요한 값(지문·ICE 정보·후보 주소)만 바이너리로 담고, 받는 쪽에서 SDP를 다시 조립 ----
+const hex2u8=h=>Uint8Array.from(h.split(':').map(x=>parseInt(x,16)));
+const u82hex=u=>[...u].map(x=>x.toString(16).toUpperCase().padStart(2,'0')).join(':');
+function ipv6bytes(a){ if(a.includes('.'))return null; const [h,t]=a.split('::'); const hp=h?h.split(':'):[], tp=t?t.split(':'):[]; if(t===undefined&&hp.length!==8)return null; const w=[...hp,...(t===undefined?[]:Array(8-hp.length-tp.length).fill('0')),...tp]; return w.length===8?w.flatMap(x=>{const n=parseInt(x||'0',16);return [n>>8,n&255]}):null; }
+function packSdp(d){
+  try{
+    const t=d.sdp, fp=t.match(/a=fingerprint:sha-256 ([0-9A-Fa-f:]+)/), uf=(t.match(/a=ice-ufrag:(\S+)/)||[])[1], pw=(t.match(/a=ice-pwd:(\S+)/)||[])[1];
+    if(!fp||!uf||!pw||uf.length>255||pw.length>255||(d.type!=='offer'&&d.type!=='answer'))return null;
+    const out=[d.type==='answer'?0x41:0x40,...hex2u8(fp[1]),uf.length,...[...uf].map(c=>c.charCodeAt(0)),pw.length,...[...pw].map(c=>c.charCodeAt(0))];
+    if(out.length!==3+32+uf.length+pw.length)return null;
+    const cs=[],seen=new Set();
+    for(const m of t.matchAll(/a=candidate:\S+ 1 udp \d+ (\S+) (\d+) typ (host|srflx|relay)/g)){
+      const [,addr,port,typ]=m; if(seen.has(addr+port))continue; seen.add(addr+port); let kind,b;
+      if(/^\d+\.\d+\.\d+\.\d+$/.test(addr)){kind=0;b=addr.split('.').map(Number);}
+      else if(/^[0-9a-f-]{36}\.local$/i.test(addr)){kind=2;b=addr.slice(0,36).replace(/-/g,'').match(/../g).map(x=>parseInt(x,16));}
+      else if(addr.includes(':')&&!/^fe80/i.test(addr)){kind=1;b=ipv6bytes(addr);if(!b)continue;} else continue;
+      cs.push([['host','srflx','relay'].indexOf(typ)|kind<<2,...b,port>>8,port&255]);
+    }
+    out.push(cs.length); cs.forEach(c=>out.push(...c)); return Uint8Array.from(out);
+  }catch{return null}
+}
+function unpackSdp(u){
+  let i=0; const ans=u[i++]===0x41, fp=u82hex(u.slice(i,i+32)); i+=32;
+  const rd=()=>{const n=u[i++],r=String.fromCharCode(...u.slice(i,i+n));i+=n;return r};
+  const uf=rd(),pw=rd(),n=u[i++],cl=[];
+  for(let k=0;k<n;k++){
+    const f=u[i++],typ=['host','srflx','relay'][f&3],kind=f>>2; let addr;
+    if(kind===0){addr=[...u.slice(i,i+4)].join('.');i+=4}
+    else if(kind===1){const w=[];for(let j=0;j<16;j+=2)w.push(((u[i+j]<<8)|u[i+j+1]).toString(16));addr=w.join(':');i+=16}
+    else{const h=[...u.slice(i,i+16)].map(x=>x.toString(16).padStart(2,'0')).join('');addr=`${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}.local`;i+=16}
+    const port=(u[i]<<8)|u[i+1]; i+=2;
+    cl.push(`a=candidate:${k+1} 1 udp ${(typ==='host'?2113937151:typ==='srflx'?1677729535:16777215)-k} ${addr} ${port} typ ${typ}`+(typ==='host'?'':' raddr 0.0.0.0 rport 0'));
+  }
+  const sdp=['v=0','o=- 1 2 IN IP4 127.0.0.1','s=-','t=0 0','a=group:BUNDLE 0','m=application 9 UDP/DTLS/SCTP webrtc-datachannel','c=IN IP4 0.0.0.0',...cl,'a=end-of-candidates',`a=ice-ufrag:${uf}`,`a=ice-pwd:${pw}`,`a=fingerprint:sha-256 ${fp}`,`a=setup:${ans?'active':'actpass'}`,'a=mid:0','a=sctp-port:5000','a=max-message-size:262144'].join('\r\n')+'\r\n';
+  const type=ans?'answer':'offer'; return {type,sdp:{type,sdp}};
+}
+async function encodeSignal(obj){ // 1순위: 초단축 코드, 실패 시 압축 코드
+  const pk=packSdp(obj.sdp); if(pk)return grp('k.'+b64u(pk));
+  const u8=new TextEncoder().encode(JSON.stringify(obj));
+  if(typeof CompressionStream==='function'){try{return grp('z.'+b64u(await pipe(u8,CompressionStream)))}catch{}}
+  return grp(b64u(u8));
+}
+async function decodeSignal(str){
+  try{str=str.replace(/\s+/g,''); if(str.startsWith('k.'))return unpackSdp(unb64u(str.slice(2))); const u8=str.startsWith('z.')?await pipe(unb64u(str.slice(2)),DecompressionStream):unb64u(str); return JSON.parse(new TextDecoder().decode(u8));}
+  catch(e){throw new Error('연결 코드 형식이 올바르지 않습니다.');}
+}
+
+function startSolo(){
+  cleanupPeer(); solo=true; timeLimitMs=(+timeSel.value||0)*60000; byoMs=(+byoSel.value||0)*1000;
+  state=initialState(soloRedFormation.value,soloBlueFormation.value); state.names={red:getName(),blue:getName()}; selected=null;
+  setRole('host','red'); sidePill.textContent='모드: 혼자 두기'; setConnection(true,'혼자 두기');
+  clockBase=Date.now(); showView('game'); setNotice('초가 먼저 둡니다.'); log('혼자 두기 시작','system'); drawBoard();
+}
+async function makeHost(){
+  timeLimitMs=(+timeSel.value||0)*60000; byoMs=(+byoSel.value||0)*1000; cleanupPeer(); role='host'; side='red'; setRole('host','red'); state=initialState(formationSel.value,'wonang'); selected=null; drawBoard();
+  pc=new RTCPeerConnection(RTC_CONFIG); dc=pc.createDataChannel('janggi',{ordered:true}); setupDataChannel();
+  pc.onconnectionstatechange=handleConnState;
+  pc.oniceconnectionstatechange=handleIceState;
+  const offer=await pc.createOffer(); await pc.setLocalDescription(offer); await waitIceGathering(pc);
+  pendingSignalMode='host-answer'; pendingLocalCode=await encodeSignal({type:'offer',sdp:pc.localDescription});
+  showSignal('친구에게 아래 <b>내 코드</b>를 보내고, 친구가 돌려준 <b>응답 코드</b>를 아래 입력칸에 붙여 넣으세요.',pendingLocalCode);
+  setConnection(false,'연결 대기'); setNotice('친구가 응답 코드를 보내면 적용하세요.'); log('방 생성: 초 배정','system');
+}
+async function makeGuestFromOffer(code){
+  cleanupPeer(); role='guest'; side='blue'; setRole('guest','blue'); state=initialState('wonang',formationSel.value); selected=null; drawBoard();
+  const offer=await decodeSignal(code); if(offer.type!=='offer') throw new Error('방장용 offer 코드가 아닙니다.');
+  pc=new RTCPeerConnection(RTC_CONFIG); pc.ondatachannel=e=>{dc=e.channel;setupDataChannel()}; pc.onconnectionstatechange=handleConnState; pc.oniceconnectionstatechange=handleIceState;
+  await pc.setRemoteDescription(offer.sdp); const ans=await pc.createAnswer(); await pc.setLocalDescription(ans); await waitIceGathering(pc);
+  pendingSignalMode='guest-offer'; pendingLocalCode=await encodeSignal({type:'answer',sdp:pc.localDescription});
+  showSignal('생성된 <b>응답 코드</b>를 방장에게 보내세요. 방장이 적용하면 연결됩니다.',pendingLocalCode); setConnection(false,'응답 생성'); log('방 참가: 한 배정','system');
+}
+async function applyHostAnswer(code){
+  if(!pc||role!=='host') throw new Error('먼저 방을 만들어야 합니다.');
+  const ans=await decodeSignal(code); if(ans.type!=='answer') throw new Error('참가자 응답 코드가 아닙니다.');
+  await pc.setRemoteDescription(ans.sdp); signalApplyBtn.disabled=true; setNotice('응답 적용 완료. P2P 연결 중...'); log('응답 코드 적용','system');
+}
+
+function showSignal(step,output=''){
+  signalArea.classList.remove('hidden'); signalStep.innerHTML=step; signalInput.value=''; signalOutput.value=output; copySignalBtn.disabled=!output; signalApplyBtn.disabled=false;
+}
+function setupDataChannel(){
+  if(!dc) return;
+  dc.onopen=()=>{setConnection(true,'연결됨'); lastPong=Date.now(); startHeartbeat(); signalArea.classList.add('hidden'); setNotice(role==='host'?'연결 완료 — 초가 선공입니다.':'연결 완료 — 한이 초의 수를 기다립니다.'); log('P2P 연결 성공','system');
+    showView('game'); if(role==='host'){state.names.red=getName(); clockBase=Date.now(); broadcast();} else send({type:'HELLO',role:'guest',name:getName(),formation:formationSel.value}); drawBoard();
+  };
+  dc.onclose=()=>{setConnection(false,'연결 종료');stopHeartbeat();setNotice('상대 연결이 끊어졌습니다.');log('상대 연결 종료','bad');drawBoard()};
+  dc.onerror=()=>{log('데이터 채널 오류','bad')};
+  dc.onmessage=e=>handleMessage(e.data);
+}
+function handleConnState(){
+  if(!pc)return; const s=pc.connectionState;
+  if(s==='connected'){setConnection(true,'연결됨')}
+  else if(['failed','closed','disconnected'].includes(s)){setConnection(false,s==='failed'?'연결 실패':'연결 종료');stopHeartbeat();}
+}
+function handleIceState(){
+  if(!pc)return; const s=pc.iceConnectionState;
+  if(s==='failed') {setConnection(false,'ICE 연결 실패'); log('직접 P2P 연결에 실패했습니다. 다른 네트워크에서 다시 시도해 보세요.','bad');}
+}
+function startHeartbeat(){stopHeartbeat();heartbeatTimer=setInterval(()=>{
+  if(!online()) return;
+  send({type:'PING',t:Date.now()});
+  if(Date.now()-lastPong>12000){unresp=true;setConnection(false,'응답 없음');setNotice('상대방의 응답이 없습니다. 연결이 끊길 수 있습니다.');}
+},3000)}
+function stopHeartbeat(){if(heartbeatTimer){clearInterval(heartbeatTimer);heartbeatTimer=null}}
+
+function handleMessage(raw){
+  let m; try{m=JSON.parse(raw)}catch{return}
+  lastPong=Date.now(); if(unresp){unresp=false;setConnection(true,'연결됨');setNotice('');}
+  if(m.type==='PING'){send({type:'PONG',t:m.t});return}
+  if(m.type==='PONG'){return}
+  if(m.type==='HELLO'){
+    if(role==='host'&&state){
+      if(m.name) state.names.blue=String(m.name).slice(0,12);
+      const f=FORMATION_LABELS[m.formation]?m.formation:'wonang';
+      if(state.moveNo===0){ state.formations.blue=f; state.board=emptyBoard(state.formations.red,state.formations.blue); }
+      broadcast(); drawBoard();
+    }
+    return;
+  }
+  if(role==='host'){
+    if(m.type==='MOVE'){
+      const ok=c=>c&&Number.isInteger(c.x)&&Number.isInteger(c.y)&&inBoard(c.x,c.y);
+      if(!ok(m.from)||!ok(m.to)) return;
+      if(state.status!=='playing'||state.turn!=='blue'){send({type:'ERROR',msg:'지금은 한 차례가 아닙니다.'});return;}
+      if(hostApplyMove(m.from,m.to)) log('상대(한)의 착수를 반영했습니다.','system'); else send({type:'ERROR',msg:'유효하지 않은 수입니다.'});
+    } else if(m.type==='PASS'){ hostApplyPass('blue');
+    } else if(m.type==='RESIGN'){
+      if(state.status==='playing'){state.status='finished';state.winner='red';state.reason='기권';state.check=null;broadcast();drawBoard();setNotice('한의 기권으로 초 승리');log('상대가 기권했습니다.','warn');}
+    } else if(m.type==='REMATCH'){
+      state.rematch.blue=true; broadcast(); drawBoard(); maybeRestart();
+    }
+  } else {
+    if(m.type==='STATE'){state=m.state;selected=null;clockBase=Date.now();drawBoard();updateGuestNotice();}
+    else if(m.type==='ERROR'){setNotice(m.msg||'요청이 거부되었습니다.');log(m.msg||'요청 거부','warn');}
+  }
+}
+function updateGuestNotice(){
+  if(!state)return;
+  if(state.status==='finished'){setNotice(`${state.reason?state.reason+' — ':''}${state.winner==='red'?'초':'한'} 승리 — 재대국을 선택하세요.`);}
+  else if(state.check) setNotice(`${state.check==='red'?'초':'한'} 장군!`);
+  else if(state.bikjang) setNotice(bikAllowed(state.board)?'빅장! 해소하지 않으면 계가로 종료됩니다.':'빅장 상태입니다. 경기 종료 없이 계속됩니다.');
+  else setNotice('');
+}
+function resign(){
+  if(!state||state.status!=='playing')return;
+  if(!confirm('정말 기권할까요?'))return;
+  if(role==='host'){
+    const lo=solo?state.turn:'red';state.status='finished';state.winner=lo==='red'?'blue':'red';state.reason='기권';state.check=null;broadcast();drawBoard();setNotice(`${lo==='red'?'초':'한'}의 기권으로 ${state.winner==='red'?'초':'한'} 승리`);log('기권했습니다.','warn');
+  }else{send({type:'RESIGN'});resignBtn.disabled=true;setNotice('기권 요청을 전송했습니다.');}
+}
+function requestRematch(){
+  if(!state||state.status!=='finished'||!online())return;
+  if(solo){const nm=state.names;const fs=state.formations||{red:soloRedFormation.value,blue:soloBlueFormation.value};state=initialState(fs.red,fs.blue);state.names=nm;clockBase=Date.now();selected=null;side='red';drawBoard();setNotice('새 대국 — 초 선공');return;}
+  state.rematch[side]=true;
+  rematchBtn.disabled=true;
+  if(role==='host'){broadcast();drawBoard();maybeRestart();} else {send({type:'REMATCH'});setNotice('재대국 동의 전송');}
+  drawBoard();
+}
+function maybeRestart(){
+  if(role==='host' && state.rematch.red && state.rematch.blue){const nm=state.names;const fs=state.formations||{red:formationSel.value,blue:'wonang'}; state=initialState(fs.red,fs.blue); state.names=nm; clockBase=Date.now(); broadcast();drawBoard();setNotice('재대국 시작! 초 선공');log('재대국 시작','system');}
+}
+function cleanupPeer(){solo=false;stopHeartbeat();try{dc?.close()}catch{} try{pc?.close()}catch{} dc=null;pc=null;pendingSignalMode=null;pendingLocalCode='';}
+
+// =========================
+// 장군 알림 · 대국 결과(화면 중앙)
+// =========================
+const resultOverlay=$('resultOverlay'), checkBanner=$('checkBanner'), checkChip=$('checkChip'), statusbarEl=$('statusbar'), resultBtn=$('resultBtn'), resRematchBtn=$('resRematchBtn');
+let resultKey=null, checkKey=null;
+const sn=s=>s==='red'?'초':'한';
+const addRing=(c,cls)=>{if(!c)return;const i=document.createElement('i');i.className=cls;c.appendChild(i);};
+function flashCheck(chk){
+  const mine=!solo&&chk===side;
+  checkBanner.className='check-banner'+(!solo&&!mine?' opp':'');
+  checkBanner.querySelector('span').textContent=solo?`${sn(chk)}의 궁이 위험합니다`:mine?'내 궁이 위험해요! 피하거나 막으세요':'상대 궁을 공격 중!';
+  void checkBanner.offsetWidth; checkBanner.classList.add('show');
+}
+function updateCheckUI(){
+  const live=state.status==='playing'?state.check:null;
+  statusbarEl.classList.toggle('in-check',!!live); checkChip.classList.toggle('hidden',!live); boardEl.classList.toggle('in-check',!!live);
+  redLabel.classList.toggle('incheck',live==='red'); blueLabel.classList.toggle('incheck',live==='blue');
+  if(state.check){ // 외통으로 끝난 경우에도 궁 표시는 남김
+    const g=generalPos(state.board,state.check), foe=state.check==='red'?'blue':'red';
+    if(g){
+      const kc=cellAt(g[0],g[1]); kc?.classList.add('incheck'); addRing(kc,'chk-ring');
+      for(let y=0;y<10;y++)for(let x=0;x<9;x++){const p=state.board[y][x]; if(p&&p.side===foe&&pseudoMoves(state.board,x,y,true).some(m=>m.x===g[0]&&m.y===g[1])) addRing(cellAt(x,y),'chk-ring atk');} // 장군을 건 기물
+    }
+  }
+  if(live){ if(checkKey!==state.moveNo){checkKey=state.moveNo;flashCheck(live);} }
+  else if(!state.check) checkKey=null;
+}
+function resultWhy(){
+  const w=state.winner,r=state.reason||'';
+  if(r==='외통') return '외통수';
+  if(r==='기권') return solo?'기권':(w===side?'상대가 기권했습니다':'내가 기권했습니다');
+  if(r==='시간 초과') return solo?'시간 초과':(w===side?'상대 시간 초과':'내 시간 초과');
+  return r;
+}
+function syncResult(){
+  const mineReq=!solo&&!!state.rematch?.[side];
+  resRematchBtn.disabled=rematchBtn.disabled||mineReq; resRematchBtn.textContent=mineReq?'상대 응답 대기 중…':'재대국';
+  $('resRematch').textContent=solo?'':`재대국: 초 ${state.rematch.red?'✅':'⬜'} · 한 ${state.rematch.blue?'✅':'⬜'}`;
+}
+function showResult(){
+  const w=state.winner, lose=!solo&&!!w&&w!==side, why=resultWhy();
+  $('resultCard').className='result-card'+(lose?' lose':'');
+  $('resEmblem').className='res-emblem '+(w==='blue'?'han':'cho'); $('resChar').textContent=w==='blue'?'漢':'楚';
+  $('resTitle').textContent=!w?'대국 종료':solo?`${sn(w)} 승리!`:lose?'패배':'승리!';
+  $('resSub').textContent=w&&!solo?`${sn(w)} 승리${why?' · '+why:''}`:why;
+  syncResult(); resultOverlay.classList.remove('hidden');
+}
+function updateResultUI(){
+  const done=state.status==='finished';
+  resultBtn.classList.toggle('hidden',!done);
+  if(!done){resultKey=null;resultOverlay.classList.add('hidden');return;}
+  const k=`${state.moveNo}|${state.winner}|${state.reason}`;
+  if(k!==resultKey){resultKey=k;showResult();} else syncResult();
+}
+resultBtn.onclick=()=>{if(state&&state.status==='finished')showResult();};
+resRematchBtn.onclick=()=>requestRematch();
+$('resViewBtn').onclick=()=>resultOverlay.classList.add('hidden');
+$('resLobbyBtn').onclick=()=>$('resetUiBtn').click();
+resultOverlay.addEventListener('click',e=>{if(e.target===resultOverlay)resultOverlay.classList.add('hidden')});
+
+// =========================
+// 착수 소리 (WebAudio로 직접 합성 — 외부 파일 없음)
+// =========================
+let actx=null, noiseBuf=null, soundOn=true, soundNo=null;
+try{soundOn=localStorage.getItem('jg_sound')!=='off'}catch{}
+const soundPill=$('soundPill');
+function getCtx(){
+  if(!actx){const AC=window.AudioContext||window.webkitAudioContext; if(!AC)return null; actx=new AC();}
+  if(actx.state==='suspended')actx.resume();
+  if(!noiseBuf){noiseBuf=actx.createBuffer(1,Math.ceil(actx.sampleRate*.06),actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+  return actx;
+}
+function playSound(kind){ // move | capture | pass
+  if(!soundOn)return; const c=getCtx(); if(!c)return;
+  const t=c.currentTime, out=c.createGain(); out.gain.value=.9; out.connect(c.destination);
+  const hit=(at,vol,f0,f1,nf)=>{ // 나무 '딱': 낮은 울림 + 짧은 노이즈 클릭
+    const o=c.createOscillator(),g=c.createGain(); o.type='sine'; o.frequency.setValueAtTime(f0,at); o.frequency.exponentialRampToValueAtTime(f1,at+.09);
+    g.gain.setValueAtTime(vol,at); g.gain.exponentialRampToValueAtTime(.001,at+.12); o.connect(g); g.connect(out); o.start(at); o.stop(at+.13);
+    const n=c.createBufferSource(); n.buffer=noiseBuf; const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=nf; bp.Q.value=1.2; const ng=c.createGain();
+    ng.gain.setValueAtTime(vol*1.1,at); ng.gain.exponentialRampToValueAtTime(.001,at+.04); n.connect(bp); bp.connect(ng); ng.connect(out); n.start(at); n.stop(at+.05);
+  };
+  if(kind==='pass')hit(t,.12,500,300,3000);
+  else if(kind==='capture'){hit(t,.55,260,110,2200);hit(t+.07,.4,200,90,1500);} // 잡을 때는 두 번 '딱-딱'
+  else hit(t,.45,300,140,2600);
+}
+function updateSound(){ // 수가 늘어났을 때만 (내 수·상대 수 모두)
+  const n=state.moveNo;
+  if(soundNo!==null&&n>soundNo){const h=(state.history||[]).slice(-1)[0]; playSound(!h?'move':/한수쉼/.test(h.text)?'pass':h.captured?'capture':'move');}
+  soundNo=n;
+}
+function refreshSoundPill(){soundPill.textContent=soundOn?'🔊':'🔇';soundPill.title=soundOn?'소리 끄기':'소리 켜기';}
+soundPill.onclick=()=>{soundOn=!soundOn;try{localStorage.setItem('jg_sound',soundOn?'on':'off')}catch{} refreshSoundPill(); if(soundOn)playSound('move');};
+document.addEventListener('pointerdown',()=>{if(soundOn)getCtx()},{once:true}); // 모바일 브라우저는 첫 터치 때 오디오를 깨워야 함
+refreshSoundPill();
+
+// =========================
+// 기보 복사 · 기보 읽기
+// =========================
+const kiboModal=$('kiboModal'), kiboInput=$('kiboInput'), kiboRedF=$('kiboRedF'), kiboBlueF=$('kiboBlueF'), kiboErr=$('kiboError'), kiboViewer=$('kiboViewer'), kiboSlider=$('kiboSlider');
+for(const sel of [kiboRedF,kiboBlueF])for(const k in FORMATION_LABELS){const o=document.createElement('option');o.value=k;o.textContent=FORMATION_LABELS[k];sel.appendChild(o);}
+let kibo=null, kiboIdx=0, kiboCells=[];
+function buildKibo(){
+  const f=state.formations||{red:'wonang',blue:'wonang'};
+  const nm=state.names||{}, L=['[장기 기보]'];
+  if(nm.red||nm.blue)L.push(`대국자: 초 ${nm.red||'-'} / 한 ${nm.blue||'-'}`);
+  L.push(`초 차림새: ${FORMATION_LABELS[f.red]||f.red}`,`한 차림새: ${FORMATION_LABELS[f.blue]||f.blue}`);
+  (state.history||[]).forEach((h,i)=>L.push(`${i+1}. ${h.text}${h.captured?' × '+pieceLabel(h.captured):''}${h.check?' '+h.check:''}`));
+  if(state.status==='finished'&&state.winner)L.push(`결과: ${sn(state.winner)} 승리${state.reason?' ('+state.reason+')':''}`);
+  return L.join('\n');
+}
+async function copyKibo(){
+  if(!state||!(state.history||[]).length){setNotice('복사할 기보가 아직 없습니다.');return;}
+  const t=buildKibo(), btn=$('kiboCopyBtn');
+  try{await navigator.clipboard.writeText(t)}catch{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+  btn.textContent='복사됨 ✓'; setTimeout(()=>btn.textContent='기보 복사',1500);
+}
+function parseKibo(text,rf,bf){
+  const inv={};for(const k in FORMATION_LABELS)inv[FORMATION_LABELS[k]]=k;
+  const mr=text.match(/초\s*차림새\s*[:：]\s*(\S+)/), mb=text.match(/한\s*차림새\s*[:：]\s*(\S+)/);
+  if(mr&&inv[mr[1]])rf=inv[mr[1]]; if(mb&&inv[mb[1]])bf=inv[mb[1]];
+  let b=emptyBoard(rf,bf), turn='red', result='', error='';
+  const boards=[b], moves=[], caps={red:[],blue:[]};
+  const norm=c=>c==='兵'?'卒':c==='漢'?'楚':c, other=x=>x==='red'?'blue':'red';
+  const MOVE=/(\d{1,2})\s*,\s*(\d{1,2})\s*(?:→|->|=>|>|-|~)\s*(\d{1,2})\s*,\s*(\d{1,2})/;
+  const snap=()=>({red:caps.red.slice(),blue:caps.blue.slice()});
+  for(const raw of text.split(/\r?\n/)){
+    const line=raw.trim(); if(!line)continue;
+    if(/^결과/.test(line)){result=line.replace(/^결과\s*[:：]?\s*/,'');continue;}
+    if(/차림새|^\[|^대국자/.test(line))continue;
+    const m=line.match(MOVE), n=moves.length+1;
+    if(m){
+      const fx=m[1]-1,fy=10-m[2],tx=m[3]-1,ty=10-m[4];
+      const fail=why=>{error=`${n}번째 수를 적용할 수 없습니다: "${line}"\n${why}`;};
+      if(!inBoard(fx,fy)||!inBoard(tx,ty)){fail('좌표가 판 범위(열 1~9, 행 1~10)를 벗어났습니다.');break;}
+      const p=b[fy][fx], pre=line.slice(0,m.index);
+      const ch=(pre.match(/[車包馬象士卒兵楚漢]/)||[])[0], sd=(pre.match(/[초한]/)||[])[0];
+      if(!p||(sd&&(sd==='초'?'red':'blue')!==p.side)||(ch&&norm(ch)!==norm(PIECES[p.side][p.type]))){fail('그 위치에 해당 기물이 없습니다. 차림새 선택을 확인해 보세요.');break;}
+      const tgt=b[ty][tx]; if(tgt&&tgt.side===p.side){fail('자기 기물이 있는 칸으로는 이동할 수 없습니다.');break;}
+      const nb=applyMoveToBoard(b,fx,fy,tx,ty); if(tgt)caps[p.side].push({...tgt});
+      const foe=other(p.side), chk=inCheck(nb,foe);
+      moves.push({text:notationMove(p,fx,fy,tx,ty)+(tgt?' × '+pieceLabel(tgt):'')+(chk?' 장군':''),from:{x:fx,y:fy},to:{x:tx,y:ty},check:chk?foe:null,caps:snap()});
+      boards.push(nb); b=nb; turn=foe;
+    }else if(/한수쉼/.test(line)){
+      const g=(line.match(/(초|한)\s*한수쉼/)||[])[1], sd=g?(g==='초'?'red':'blue'):turn;
+      moves.push({text:`${sn(sd)} 한수쉼`,pass:true,check:null,caps:snap()}); boards.push(b); turn=other(sd);
+    }
+  }
+  if(!moves.length&&!error)error='읽을 수 있는 수가 없습니다. 예) 1. 초 卒 9,4 → 9,5';
+  return {boards,moves,result,error,rf,bf};
+}
+function buildKiboGrid(){
+  if(kiboCells.length)return; const g=$('kiboGrid');
+  g.appendChild(gridEl.querySelector('.palace-lines').cloneNode(true));
+  for(let y=0;y<10;y++)for(let x=0;x<9;x++){const c=document.createElement('div');c.className='cell';c.style.left=(x/8*100)+'%';c.style.top=(y/9*100)+'%';g.appendChild(c);kiboCells[y*9+x]=c;}
+}
+function renderKibo(){
+  const b=kibo.boards[kiboIdx], mv=kiboIdx?kibo.moves[kiboIdx-1]:null, total=kibo.moves.length;
+  kiboCells.forEach(c=>{c.className='cell';c.innerHTML='';});
+  for(let y=0;y<10;y++)for(let x=0;x<9;x++){const p=b[y][x]; if(!p)continue;const d=document.createElement('div');d.className='piece '+p.side+' type-'+p.type+(p.type==='K'?' general':'');d.textContent=PIECES[p.side][p.type];kiboCells[y*9+x].appendChild(d);}
+  if(mv&&!mv.pass){kiboCells[mv.from.y*9+mv.from.x].classList.add('last-from');kiboCells[mv.to.y*9+mv.to.x].classList.add('last-to');}
+  if(mv&&mv.check){const g=generalPos(b,mv.check); if(g){kiboCells[g[1]*9+g[0]].classList.add('incheck');addRing(kiboCells[g[1]*9+g[0]],'chk-ring');}}
+  let info=kiboIdx?`${kiboIdx} / ${total}수 · ${mv.text}`:`시작 위치 (총 ${total}수)`;
+  if(kiboIdx===total&&kibo.result)info+=`\n결과: ${kibo.result}`;
+  $('kiboForm').innerHTML=`<span style="color:var(--cho)">초</span> 차림새 ${FORMATION_LABELS[kibo.rf]||'-'} · <span style="color:var(--han)">한</span> 차림새 ${FORMATION_LABELS[kibo.bf]||'-'}`; $('kiboInfo').style.whiteSpace='pre-line'; $('kiboInfo').textContent=info;
+  const caps=mv?mv.caps:{red:[],blue:[]}; renderCaptured($('kiboCapRed'),caps.red); renderCaptured($('kiboCapBlue'),caps.blue);
+  kiboSlider.max=total; kiboSlider.value=kiboIdx;
+  $('kFirst').disabled=$('kPrev').disabled=kiboIdx===0; $('kNext').disabled=$('kLast').disabled=kiboIdx===total;
+}
+function kiboGo(i){if(!kibo)return;kiboIdx=Math.max(0,Math.min(kibo.moves.length,i));renderKibo();}
+function loadKibo(){
+  const r=parseKibo(kiboInput.value,kiboRedF.value,kiboBlueF.value);
+  kiboRedF.value=r.rf; kiboBlueF.value=r.bf; kibo=r;
+  kiboErr.textContent=r.error; kiboErr.style.whiteSpace='pre-line'; kiboErr.classList.toggle('hidden',!r.error);
+  buildKiboGrid(); kiboViewer.classList.remove('hidden'); kiboGo(r.moves.length); // 에러가 있어도 적용된 부분까지 보여줌
+}
+function openKibo(fromGame){
+  $('logModal').classList.add('hidden'); kiboModal.classList.remove('hidden');
+  const f=state?.formations; if(f&&fromGame){kiboRedF.value=f.red;kiboBlueF.value=f.blue;}
+  if(fromGame&&state&&(state.history||[]).length){kiboInput.value=buildKibo();loadKibo();} // 진행 중인 대국 복기
+}
+$('kiboOpenBtn').onclick=()=>openKibo(false);
+$('kiboFromLogBtn').onclick=()=>openKibo(true);
+$('kiboCopyBtn').onclick=copyKibo;
+$('kiboLoadBtn').onclick=loadKibo;
+$('closeKibo').onclick=()=>kiboModal.classList.add('hidden');
+$('kFirst').onclick=()=>kiboGo(0); $('kPrev').onclick=()=>kiboGo(kiboIdx-1); $('kNext').onclick=()=>kiboGo(kiboIdx+1); $('kLast').onclick=()=>kiboGo(1e9);
+kiboSlider.oninput=()=>kiboGo(+kiboSlider.value);
+document.addEventListener('keydown',e=>{
+  if(kiboModal.classList.contains('hidden')||!kibo||['TEXTAREA','SELECT','INPUT'].includes(e.target.tagName))return;
+  if(e.key==='ArrowLeft')kiboGo(kiboIdx-1); else if(e.key==='ArrowRight')kiboGo(kiboIdx+1);
+});
+
+// UI wiring
+$('soloBtn').onclick=startSolo;
+createBtn.onclick=()=>makeHost().catch(e=>{log(e.message||String(e),'bad');alert(e.message||String(e))});
+joinBtn.onclick=()=>{cleanupPeer();role='guest';side='blue';setRole('guest','blue');signalArea.classList.remove('hidden');signalStep.innerHTML='방장의 <b>offer 코드</b>를 입력하고 적용하면 응답 코드가 생성됩니다.';signalInput.value='';signalOutput.value='';pendingSignalMode='guest-offer';signalApplyBtn.disabled=false;copySignalBtn.disabled=true;resetClientState();setNotice('방장 코드를 기다리는 중입니다.');};
+signalApplyBtn.onclick=()=>{
+  const code=signalInput.value.trim(); if(!code){alert('코드를 입력하세요.');return;}
+  (async()=>{
+    try{
+      if(pendingSignalMode==='guest-offer'){await makeGuestFromOffer(code)}
+      else if(pendingSignalMode==='host-answer'){await applyHostAnswer(code)}
+    }catch(e){alert(e.message||String(e));log(e.message||String(e),'bad')}
+  })();
+};
+copySignalBtn.onclick=async()=>{try{await navigator.clipboard.writeText(signalOutput.value);setNotice('내 코드를 복사했습니다.');}catch{signalOutput.select();document.execCommand('copy');setNotice('내 코드를 복사했습니다.')}};
+passBtn.onclick=()=>{if(!state||state.status!=='playing'||state.turn!==side)return; if(state.bikjang&&bikAllowed(state.board)&&!confirm('빅장 상태에서 한수쉼하면 빅장이 성립해 계가(점수)로 대국이 끝납니다.\n\n그래도 쉴까요?'))return; if(role==='host')hostApplyPass(side); else send({type:'PASS'});}; $('logBtn').onclick=()=>$('logModal').classList.remove('hidden');$('closeLog').onclick=()=>$('logModal').classList.add('hidden');
+resignBtn.onclick=resign; rematchBtn.onclick=requestRematch;
+$('resetUiBtn').onclick=()=>location.reload();
+
+try{nameInput.value=localStorage.getItem('jg_name')||''}catch{} nameInput.oninput=()=>{try{localStorage.setItem('jg_name',nameInput.value)}catch{}};
+showView('lobby'); buildGrid(); state=null; setConnection(false,'연결 안 됨');
+</script>
 </body>
 </html>
